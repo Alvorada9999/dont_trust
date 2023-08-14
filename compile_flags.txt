@@ -1,0 +1,6 @@
+-pedantic-errors
+-Wall
+-Wextra
+-Wsign-conversion
+-Werror
+-std=c99
