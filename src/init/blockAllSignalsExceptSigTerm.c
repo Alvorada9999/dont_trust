@@ -1,7 +1,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
-void blockAllSignalsExceptSitTerm(void) {
+void blockAllSignalsExceptSigTerm(void) {
   sigset_t sigSetToBlock;
   sigfillset(&sigSetToBlock);
   sigdelset(&sigSetToBlock, SIGTERM);

@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   CommandLineOptions commandLineOptions;
   memset(&commandLineOptions, 0, sizeof(CommandLineOptions));
   
-  blockAllSignalsExceptSitTerm();
+  blockAllSignalsExceptSigTerm();
   getCommandLineOptions(argc, argv, &commandLineOptions);
   printf("IPv4: %s\n", commandLineOptions.ipV4);
 
