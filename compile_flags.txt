@@ -3,4 +3,4 @@
 -Wextra
 -Wsign-conversion
 -Werror
--std=c99
+-Ibuild
