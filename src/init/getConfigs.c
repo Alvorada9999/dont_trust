@@ -14,7 +14,7 @@ bool isLineOptionValid(char *string, char *array[]) {
   return false;
 }
 
-void getCommandLineOptions(int argc, char *argv[], CommandLineOptions *commandLineOptions){
+void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
   char *comandLineOptions[] = {"-h\0", "-c\0"};
   char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n-c   Connects to an IPv4\n-h   This help message\n";
   for(int i=0; i<argc; i++) {
@@ -30,6 +30,7 @@ void getCommandLineOptions(int argc, char *argv[], CommandLineOptions *commandLi
         printf("Should provide IPv4 address\n");
         exit(EXIT_SUCCESS);
       }
+      commandLineOptions -> shouldActAsServer = false;
       commandLineOptions -> ipV4 = argv[i+1];
     }
   }

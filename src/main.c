@@ -6,12 +6,11 @@
 #include "init.h"
 
 int main(int argc, char *argv[]) {
-  CommandLineOptions commandLineOptions;
-  memset(&commandLineOptions, 0, sizeof(CommandLineOptions));
-  
-  blockAllSignalsExceptSigTerm();
-  getCommandLineOptions(argc, argv, &commandLineOptions);
-  printf("IPv4: %s\n", commandLineOptions.ipV4);
+  Configs configs;
+  memset(&configs, 0, sizeof(Configs));
+  configs.shouldActAsServer = true;
+  blockAllSignals();
+  getConfigs(argc, argv, &configs);
 
   return 0;
 }
