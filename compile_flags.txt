@@ -4,3 +4,4 @@
 -Wsign-conversion
 -Werror
 -Ibuild
+-lpthread
