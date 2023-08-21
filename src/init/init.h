@@ -1,10 +1,14 @@
 #ifndef init
+#define init
+#include <stdbool.h>
 
 typedef struct {
   char *ipV4;
-} CommandLineOptions;
+  //is true when the above is not given
+  bool shouldActAsServer;
+} Configs;
 
-void blockAllSignalsExceptSigTerm(void);
-void getCommandLineOptions(int argc, char *argv[], CommandLineOptions *commandLineOptions);
+void blockAllSignals(void);
+void getConfigs(int argc, char *argv[], Configs *commandLineOptions);
 
 #endif // !init
