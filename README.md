@@ -1,3 +1,4 @@
+#### 🚧 Work in progress 🚧
 # dont_trust
 
 Secure peer to peer communication, opsec focused
