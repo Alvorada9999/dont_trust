@@ -8,7 +8,6 @@ typedef struct {
   bool shouldActAsServer;
 } Configs;
 
-void blockAllSignals(void);
 void getConfigs(int argc, char *argv[], Configs *commandLineOptions);
 
 #endif // !init
