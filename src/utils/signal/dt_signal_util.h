@@ -2,6 +2,6 @@
 #define DTSIGNALUTIL
 
 int blockAllSignals(void);
-int unblockSigInt(void);
+int unblockIntAndWinchSignals(void);
 
 #endif
