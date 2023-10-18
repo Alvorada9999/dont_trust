@@ -1,6 +1,9 @@
 #ifndef DTCOMMON
 #define DTCOMMON
 
+#include <stdint.h>
+#define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
+
 struct Message {
   char *string;
   unsigned int size;
@@ -27,6 +30,6 @@ typedef struct {
 void EnqueueMessage(MessageQueue *messageQueue, Message *message);
 void DequeueMessage(MessageQueue *messageQueue);
 
-int renderMessages(AllMessages *allMessages);
+int8_t renderMessages(AllMessages *allMessages);
 
 #endif // !DTCOMMON
