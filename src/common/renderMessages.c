@@ -32,12 +32,58 @@ u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes) {
   return size;
 }
 
+void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
+  static char *redBackgroundEscapeSequence = "\033[41m";
+  static uint8_t redBackgroundEscapeSequenceSize = strlen("\033[41m");
+  static char *greenBackgroundEscapeSequence = "\033[42m";
+  static uint8_t greenBackgroundEscapeSequenceSize = strlen("\033[42m");
+  static char *resetBackgroundEscapeSequence = "\033[0m";
+  static uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
+  switch (status) {
+    case PEER_READ:
+      for (uint8_t i=0; i<greenBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = greenBackgroundEscapeSequence[i];
+        (*textToOutputWrittenSize)++;
+        (*maxWritingSize)++;
+      }
+      break;
+    case PEER_NOT_READ:
+      for (uint8_t i=0; i<redBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = redBackgroundEscapeSequence[i];
+        (*textToOutputWrittenSize)++;
+        (*maxWritingSize)++;
+      }
+      break;
+    case RECEIVED:
+      for (uint8_t i=0; i<resetBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = resetBackgroundEscapeSequence[i];
+        (*textToOutputWrittenSize)++;
+        (*maxWritingSize)++;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+/* Add reset escape sequences 
+to "textToOutput"*/
+void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
+  static char *resetBackgroundEscapeSequence = "\033[0m";
+  static uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
+  for (uint8_t i=0; i<resetBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+    textToOutput[*textToOutputWrittenSize] = resetBackgroundEscapeSequence[i];
+    (*textToOutputWrittenSize)++;
+    (*maxWritingSize)++;
+  }
+}
+
 int8_t renderMessages(AllMessages *allMessages) {
   static char *cleartTerminalEscapeSequence = "\033[H\033[0J\033[3J";
   static u_int8_t clearTerminalEscapeSequenceSize = strlen("\033[H\033[0J\033[3J");
 
   //stop if there are no messages
-  if(allMessages->startingMessage == NULL) return 0;
+  if(allMessages->currentStartingMessage == NULL) return 0;
   struct winsize winSize;
   memset(&winSize, 0, sizeof(struct winsize));
   ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);
@@ -52,19 +98,18 @@ int8_t renderMessages(AllMessages *allMessages) {
   for (u_int32_t i=0; i<clearTerminalEscapeSequenceSize; i++) {
     textToOutput[i] = cleartTerminalEscapeSequence[i];
   }
-  //should add the max amount of possible messages too to be able to handle
-  //backgroung color changing escape sequences between each message
-  u_int16_t maxWritingSize = amountOfCharsThatCanBeShow + clearTerminalEscapeSequenceSize;
+  u_int32_t maxWritingSize = amountOfCharsThatCanBeShow + clearTerminalEscapeSequenceSize;
 
   u_int16_t remainingRowSpace = winSize.ws_col, currentMessageReadSizeInBytes = 0;
   u_int16_t wordSize = 0;
-  Message *currentMessage = allMessages->startingMessage;
+  Message *currentMessage = allMessages->currentStartingMessage;
+  updateBackgroundColor(currentMessage->status, textToOutput, &textToOutputWrittenSize, &maxWritingSize);
   do {
     while(currentMessageReadSizeInBytes < currentMessage->size && textToOutputWrittenSize < maxWritingSize) {
       wordSize = getWordSize(currentMessage->string+currentMessageReadSizeInBytes, currentMessage->size - currentMessageReadSizeInBytes);
       if(wordSize <= winSize.ws_col) {
         if(wordSize <= remainingRowSpace) {
-          for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize; i++) {
+          for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
             textToOutput[textToOutputWrittenSize] = currentMessage->string[currentMessageReadSizeInBytes];
 
             textToOutputWrittenSize += 1;
@@ -72,14 +117,14 @@ int8_t renderMessages(AllMessages *allMessages) {
             remainingRowSpace -= 1;
           }
         } else {
-          for (u_int16_t i=0; i<remainingRowSpace && textToOutputWrittenSize < maxWritingSize; i++) {
+          for (u_int16_t i=0; i<remainingRowSpace && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
             textToOutput[textToOutputWrittenSize] = ESPACE;
 
             textToOutputWrittenSize += 1;
           }
           remainingRowSpace = winSize.ws_col;
 
-          for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize; i++) {
+          for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
             textToOutput[textToOutputWrittenSize] = currentMessage->string[currentMessageReadSizeInBytes];
             
             textToOutputWrittenSize += 1;
@@ -95,7 +140,7 @@ int8_t renderMessages(AllMessages *allMessages) {
         }
         remainingRowSpace = winSize.ws_col - tempWordSize;
 
-        for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize; i++) {
+        for (u_int16_t i=0; i<wordSize && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
           textToOutput[textToOutputWrittenSize] = currentMessage->string[currentMessageReadSizeInBytes];
 
           textToOutputWrittenSize += 1;
@@ -104,12 +149,29 @@ int8_t renderMessages(AllMessages *allMessages) {
       }
     }
 
-    //before each message, a escape sequence is added
-    //"textToOutputWrittenSize" must be increased to avoid writing above the escape sequence
-    //"maxWritingSize" must also be increased to don't decrease the amount of chars that can be show
+    //to "break" a line
+    for (u_int16_t i=0; i<remainingRowSpace && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+      textToOutput[textToOutputWrittenSize] = ESPACE;
+      textToOutputWrittenSize += 1;
+    }
+    //before "breaking" a line, reset background color
+    addResetBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
+    for (u_int16_t i=0; i<winSize.ws_col && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+      textToOutput[textToOutputWrittenSize] = ESPACE;
+      textToOutputWrittenSize += 1;
+    }
+    remainingRowSpace = winSize.ws_col;
+
 
     currentMessage = currentMessage->nextMessage;
     currentMessageReadSizeInBytes = 0;
+
+    //before each message, background color escape sequence is added
+    //"textToOutputWrittenSize" must be increased to avoid writing above the escape sequence
+    if(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize) {
+      updateBackgroundColor(currentMessage->status, textToOutput, &textToOutputWrittenSize, &maxWritingSize);
+    }
+
   } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize);
 
   ssize_t writtenSize = 0;

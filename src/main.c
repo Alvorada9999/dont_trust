@@ -29,20 +29,23 @@ int main(int argc, char *argv[]) {
   Message A, B, C;
   A.string = "The brain is XXXXXXXXXXXXXXXXXXXXXXX really little more than a collection of electrical signals. If we can learn to catalogue those then, in theory, you could upload someone's mind into a computer, allowing them to live forever as a digital form of consciousness, just like in the Johnny Depp film Transcendence.";
   A.size = 312;
+  A.status = PEER_NOT_READ;
   A.nextMessage = &B;
   B.string = "But it's not just science fiction. Sure, scientists aren't anywhere near close to achieving such a feat with humans (and even if they could, the ethics would be pretty fraught), but there's few better examples than the time an international team of researchers managed to do just that with the roundworm Caenorhabditis elegans.";
   B.size = 327;
+  B.status = RECEIVED;
   B.nextMessage = &C;
   C.string = "C. elegans is a little nematodes that have been extensively studied by scientists - we know all their genes and their nervous system has been analysed many times.";
   C.size = 162;
+  C.status = PEER_READ;
   C.nextMessage = NULL;
 
   allMessages.sizeInChars = 351;
   allMessages.messagesInOrder[0] = &A;
   allMessages.messagesInOrder[1] = &B;
   allMessages.messagesInOrder[2] = &C;
-  allMessages.startingMessage = &A;
-  allMessages.startingMessageCharPosition = 1;
+  allMessages.currentStartingMessage = &A;
+  allMessages.currentStartingMessageCharPosition = 1;
   allMessages.numberOfMessages = 3;
 
   //test ----------------

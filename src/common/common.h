@@ -2,12 +2,20 @@
 #define DTCOMMON
 
 #include <stdint.h>
+#include <stdbool.h>
 #define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
+
+enum MessageStatus {
+  PEER_NOT_READ = 1,
+  PEER_READ = 2,
+  RECEIVED = 3
+};
 
 struct Message {
   char *string;
   unsigned int size;
   struct Message *nextMessage;
+  uint8_t status;
 };
 
 typedef struct Message Message;
@@ -20,8 +28,8 @@ typedef struct {
 
 typedef struct {
   unsigned int sizeInChars;
-  Message *startingMessage;
-  unsigned int startingMessageCharPosition;
+  Message *currentStartingMessage;
+  unsigned int currentStartingMessageCharPosition;
   unsigned int numberOfMessages;
   Message *messagesInOrder[];
 } AllMessages;
