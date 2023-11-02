@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "terminal.h"
+#include "error.h"
 
 u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes) {
   u_int16_t size = 0;
@@ -106,7 +107,7 @@ int8_t renderMessages(AllMessages *allMessages) {
   // the last two rows are used to show some info and the text that is currently being typed
   u_int32_t amountOfCharsThatCanBeShow = (winSize.ws_row - 2) * winSize.ws_col;
   if(winSize.ws_row < 3) return 0;
-  if(amountOfCharsThatCanBeShow > DEFAULT_MESSAGE_OUTPUT_SIZE) return -4;
+  if(amountOfCharsThatCanBeShow > DEFAULT_MESSAGE_OUTPUT_SIZE) errExit(4);
   //let's compromise to use this many memory since malloc is not async-signal-safe
   static char textToOutput[DEFAULT_MESSAGE_OUTPUT_SIZE];
   memset(textToOutput, 0, DEFAULT_MESSAGE_OUTPUT_SIZE);

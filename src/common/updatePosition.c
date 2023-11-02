@@ -26,7 +26,6 @@
 #include "common.h"
 
 int8_t updatePostion(AllMessages *allMessages, char jOrK) {
-  fflush(stdout);
   static struct winsize winSize;
   memset(&winSize, 0, sizeof(struct winsize));
   ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);

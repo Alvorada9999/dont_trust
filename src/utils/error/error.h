@@ -14,16 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <signal.h>
-#include <stdlib.h>
+#ifndef DTERROR
+#define DTERROR
+#include <stdint.h>
 
-#include "error.h"
+void errExit(uint16_t errCode);
 
-int blockAllSignals(void) {
-  sigset_t sigSetToBlock;
-  if(sigfillset(&sigSetToBlock) != 0)
-    errExit(1);
-  if(sigprocmask(SIG_SETMASK, &sigSetToBlock, NULL) != 0)
-    errExit(1);
-  return 0;
-}
+#endif // !DTERROR

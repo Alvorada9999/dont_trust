@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -27,6 +28,7 @@
 #include "init.h"
 #include "dt_signal_util.h"
 #include "terminal.h"
+#include "net.h"
 
 AllMessages allMessages;
 void sigWinchHandler(int sigNumber) {
@@ -117,17 +119,15 @@ int main(int argc, char *argv[]) {
   Configs configs;
   memset(&configs, 0, sizeof(Configs));
   configs.shouldActAsServer = true;
-  if(blockAllSignals() != 0)
-    return -1;
+  blockAllSignals();
   //to do - thread creation
-  if(unblockIntAndWinchSignals() != 0)
-    return -2;
+  unblockIntAndWinchSignals();
+
   getConfigs(argc, argv, &configs);
 
   struct termios oldTerminalConfigurations;
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
-  if(setCbreak(STDIN_FILENO, &oldTerminalConfigurations) != 0)
-    return -3;
+  setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
 
   char inputBuffer[65535];
   unsigned int inputBufferSize = 0;
@@ -144,8 +144,6 @@ int main(int argc, char *argv[]) {
           switch (processingBuffer[i]) {
             case ESCAPE:
               applicationMode = VIEW;
-              break;
-            case NULLBYTE:
               break;
             case DEL:
               write(STDOUT_FILENO, delSequence, sizeof(strlen(delSequence)));
