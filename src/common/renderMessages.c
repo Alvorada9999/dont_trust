@@ -51,11 +51,11 @@ u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes) {
 
 void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
   static char *redBackgroundEscapeSequence = "\033[41m";
-  static uint8_t redBackgroundEscapeSequenceSize = strlen("\033[41m");
+  uint8_t redBackgroundEscapeSequenceSize = strlen("\033[41m");
   static char *greenBackgroundEscapeSequence = "\033[42m";
-  static uint8_t greenBackgroundEscapeSequenceSize = strlen("\033[42m");
+  uint8_t greenBackgroundEscapeSequenceSize = strlen("\033[42m");
   static char *resetBackgroundEscapeSequence = "\033[0m";
-  static uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
+  uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
   switch (status) {
     case PEER_READ:
       for (uint8_t i=0; i<greenBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
@@ -87,7 +87,7 @@ void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToO
 to "textToOutput"*/
 void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
   static char *resetBackgroundEscapeSequence = "\033[0m";
-  static uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
+  uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
   for (uint8_t i=0; i<resetBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
     textToOutput[*textToOutputWrittenSize] = resetBackgroundEscapeSequence[i];
     (*textToOutputWrittenSize)++;
@@ -97,7 +97,7 @@ void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToO
 
 int8_t renderMessages(AllMessages *allMessages) {
   static char *cleartTerminalEscapeSequence = "\033[H\033[0J\033[3J";
-  static u_int8_t clearTerminalEscapeSequenceSize = strlen("\033[H\033[0J\033[3J");
+  u_int8_t clearTerminalEscapeSequenceSize = strlen("\033[H\033[0J\033[3J");
 
   //stop if there are no messages
   if(allMessages->currentStartingMessage == NULL) return 0;
@@ -105,6 +105,7 @@ int8_t renderMessages(AllMessages *allMessages) {
   memset(&winSize, 0, sizeof(struct winsize));
   ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);
   // the last two rows are used to show some info and the text that is currently being typed
+  // the value at the right side of the equation won't be negative so no problem between different signedness, don't bother :)
   u_int32_t amountOfCharsThatCanBeShow = (winSize.ws_row - 2) * winSize.ws_col;
   if(winSize.ws_row < 3) return 0;
   if(amountOfCharsThatCanBeShow > DEFAULT_MESSAGE_OUTPUT_SIZE) errExit(4);
