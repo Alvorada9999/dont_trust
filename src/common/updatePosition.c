@@ -38,13 +38,15 @@ int8_t updatePostion(AllMessages *allMessages, char jOrK) {
 
   switch (jOrK) {
     case 'j':
-      readSize = allMessages->currentStartingMessageCharPosition;
-
-      if(allMessages->currentStartingMessageCharPosition == currentMessage->size && currentMessage->nextMessage != NULL) {
+      if(currentMessage->size-allMessages->currentStartingMessageCharPosition <= remainingRowSpace && currentMessage->nextMessage != NULL) {
         allMessages->currentStartingMessage = currentMessage->nextMessage;
         allMessages->currentStartingMessageCharPosition = 0;
+        currentMessage = allMessages->currentStartingMessage;
         break;
       }
+
+      readSize = allMessages->currentStartingMessageCharPosition;
+
       while (wordSize <= remainingRowSpace && readSize < currentMessage->size) {
         wordSize = getWordSize(currentMessage->string+readSize, currentMessage->size - readSize);
         if(wordSize <= remainingRowSpace) {
@@ -63,13 +65,10 @@ int8_t updatePostion(AllMessages *allMessages, char jOrK) {
     case 'k':
       readSize = 0;
 
-      if(allMessages->currentStartingMessageCharPosition == 0) {
-        if(currentMessage->previousMessage != NULL) {
-          allMessages->currentStartingMessage = currentMessage->previousMessage;
-          allMessages->currentStartingMessageCharPosition = currentMessage->previousMessage->size;
-          return 0;
-        }
-        return 0;
+      if(allMessages->currentStartingMessageCharPosition == 0 && currentMessage->previousMessage != NULL) {
+        allMessages->currentStartingMessage = currentMessage->previousMessage;
+        allMessages->currentStartingMessageCharPosition = currentMessage->previousMessage->size;
+        currentMessage = allMessages->currentStartingMessage;
       }
 
       uint32_t currentLineStartingPosition = 0, previousLineStartingPosition = 0;
