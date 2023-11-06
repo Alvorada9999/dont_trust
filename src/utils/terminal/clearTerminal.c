@@ -14,19 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTTERMINALUTIL
-#define DTTERMINALUTIL
+#include <string.h>
 
-#define NULLBYTE 0
-#define DEL 127
-#define LINEFEED 10
-#define ESPACE 32
-#define ESCAPE 27
+#include <unistd.h>
 
-#include <termios.h>
-
-int setCbreak(int fd, struct termios *prevTermios);
-void resetTerminal(int fd, struct termios *termiosAttr);
-void clearTerminal(void);
-
-#endif
+void clearTerminal(void) {
+  ssize_t writtenSize = 0;
+  while(writtenSize > -1 && writtenSize < strlen("\033[H\033[0J\033[3J")) {
+    writtenSize += write(STDOUT_FILENO, "\033[H\033[0J\033[3J"+writtenSize, strlen("\033[H\033[0J\033[3J")-writtenSize);
+  }
+}

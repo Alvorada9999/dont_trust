@@ -63,8 +63,8 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
     memset(response, 0, 6);
 
     char gretting[3] = {5, 1, 0};
-    while (writtenSize < 3) {
-      writtenSize += write(socketFd, gretting + writtenSize, 3);
+    while (writtenSize>-1 && writtenSize < 3) {
+      writtenSize += write(socketFd, gretting + writtenSize, 3-writtenSize);
     }
 
     while (readSize < 2) {
@@ -75,8 +75,8 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
     writtenSize = 0;
     readSize = 0;
 
-    while (writtenSize < 7 + 62) {
-      writtenSize += write(socketFd, connectionRequest + writtenSize, 7 + 62);
+    while (writtenSize>-1 && writtenSize < 7 + 62) {
+      writtenSize += write(socketFd, connectionRequest + writtenSize, (7 + 62)-writtenSize);
     }
 
     memset(response, 0, 6);

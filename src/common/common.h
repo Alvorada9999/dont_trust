@@ -39,16 +39,10 @@ struct Message {
 typedef struct Message Message;
 
 typedef struct {
-  Message *firstMessage;
-  Message *LastMessage;
-  int size;
-} MessageQueue;
-
-typedef struct {
   unsigned int sizeInChars;
   Message *currentStartingMessage;
   unsigned int currentStartingMessageCharPosition;
-  Message *messagesInOrder[];
+  Message *lastMessage;
 } AllMessages;
 
 enum ApplicationStatus {
@@ -56,8 +50,8 @@ enum ApplicationStatus {
   VIEW = 2
 };
 
-void EnqueueMessage(MessageQueue *messageQueue, Message *message);
-void DequeueMessage(MessageQueue *messageQueue);
+void addNewMessage(AllMessages *allMessages, char *message, uint16_t size);
+void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize);
 
 int8_t renderMessages(AllMessages *allMessages);
 int8_t updatePostion(AllMessages *allMessages, char jOrK);

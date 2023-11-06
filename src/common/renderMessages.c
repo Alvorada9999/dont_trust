@@ -96,9 +96,6 @@ void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToO
 }
 
 int8_t renderMessages(AllMessages *allMessages) {
-  static char *cleartTerminalEscapeSequence = "\033[H\033[0J\033[3J";
-  u_int8_t clearTerminalEscapeSequenceSize = strlen("\033[H\033[0J\033[3J");
-
   //stop if there are no messages
   if(allMessages->currentStartingMessage == NULL) return 0;
   struct winsize winSize;
@@ -112,11 +109,8 @@ int8_t renderMessages(AllMessages *allMessages) {
   //let's compromise to use this many memory since malloc is not async-signal-safe
   static char textToOutput[DEFAULT_MESSAGE_OUTPUT_SIZE];
   memset(textToOutput, 0, DEFAULT_MESSAGE_OUTPUT_SIZE);
-  u_int32_t textToOutputWrittenSize = clearTerminalEscapeSequenceSize;
-  for (u_int32_t i=0; i<clearTerminalEscapeSequenceSize; i++) {
-    textToOutput[i] = cleartTerminalEscapeSequence[i];
-  }
-  u_int32_t maxWritingSize = amountOfCharsThatCanBeShow + clearTerminalEscapeSequenceSize;
+  u_int32_t textToOutputWrittenSize = 0;
+  u_int32_t maxWritingSize = amountOfCharsThatCanBeShow;
 
   u_int16_t remainingRowSpace = winSize.ws_col, currentMessageReadSizeInBytes = allMessages->currentStartingMessageCharPosition;
   u_int16_t wordSize = 0;
@@ -193,8 +187,8 @@ int8_t renderMessages(AllMessages *allMessages) {
   } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize);
 
   ssize_t writtenSize = 0;
-  while(writtenSize < maxWritingSize) {
-    writtenSize += write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize);
+  while(writtenSize > -1 && writtenSize < maxWritingSize) {
+    writtenSize += write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize-writtenSize);
   }
 
   return 0;

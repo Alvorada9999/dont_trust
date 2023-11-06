@@ -14,24 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
 #include <unistd.h>
-#include <termios.h>
 #include <signal.h>
-#include <sys/ioctl.h>
 
 #include "common.h"
 #include "init.h"
 #include "dt_signal_util.h"
 #include "terminal.h"
-#include "net.h"
 
 AllMessages allMessages;
 void sigWinchHandler(int sigNumber) {
+  clearTerminal();
   renderMessages(&allMessages);
 }
 
@@ -101,18 +97,9 @@ int main(int argc, char *argv[]) {
   J.previousMessage = &I;
 
   allMessages.sizeInChars = 2196;
-  allMessages.messagesInOrder[0] = &A;
-  allMessages.messagesInOrder[1] = &B;
-  allMessages.messagesInOrder[2] = &C;
-  allMessages.messagesInOrder[3] = &D;
-  allMessages.messagesInOrder[4] = &E;
-  allMessages.messagesInOrder[5] = &F;
-  allMessages.messagesInOrder[6] = &G;
-  allMessages.messagesInOrder[7] = &H;
-  allMessages.messagesInOrder[8] = &I;
-  allMessages.messagesInOrder[9] = &J;
   allMessages.currentStartingMessage = &A;
   allMessages.currentStartingMessageCharPosition = 0;
+  allMessages.lastMessage = &J;
 
   //test ----------------
 
@@ -130,15 +117,14 @@ int main(int argc, char *argv[]) {
   setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
 
   char inputBuffer[65535];
-  unsigned int inputBufferSize = 0;
-  int lastReadSize;
+  uint16_t inputBufferSize = 0;
+  int16_t lastReadSize = 0;
   char processingBuffer[65535];
 
-  char *delSequence = "\x1b[1D\x1b[0K";
   uint8_t applicationMode = EDIT;
   while(true) {
     lastReadSize = read(STDIN_FILENO, processingBuffer, 65535);
-    for(int i=0; i<lastReadSize; i++) {
+    for(int16_t i=0; i<lastReadSize; i++) {
       switch (applicationMode) {
         case EDIT:
           switch (processingBuffer[i]) {
@@ -146,17 +132,24 @@ int main(int argc, char *argv[]) {
               applicationMode = VIEW;
               break;
             case DEL:
-              write(STDOUT_FILENO, delSequence, sizeof(strlen(delSequence)));
               if(inputBufferSize > 0) {
                 inputBufferSize -= 1;
+                renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize);
+              }
+              break;
+            case LINEFEED:
+              if(inputBufferSize > 0) {
+                addNewMessage(&allMessages, inputBuffer, inputBufferSize);
+                raise(SIGWINCH);
+                inputBufferSize = 0;
               }
               break;
             default:
               //input validation, refer to ascii table
-              if(*(processingBuffer+i) > 31 && *(processingBuffer+i) < 127) {
-                write(STDOUT_FILENO, processingBuffer+i, 1);
+              if(inputBufferSize < 65535 && *(processingBuffer+i) > 31 && *(processingBuffer+i) < 127) {
                 inputBuffer[inputBufferSize] = processingBuffer[i];
                 inputBufferSize += 1;
+                renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize);
               }
           }
           break;
