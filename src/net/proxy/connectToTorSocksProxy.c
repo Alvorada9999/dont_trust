@@ -52,10 +52,11 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
   struct sockaddr_in proxyAddr;
   memset(&proxyAddr, 0, sizeof(struct sockaddr_in));
   proxyAddr.sin_family = AF_INET;
-  proxyAddr.sin_port = htons(9050);
+  proxyAddr.sin_port = htons(DEFAULT_TOR_PROXY_PORT);
   proxyAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
   int8_t socketFd = socket(AF_INET, SOCK_STREAM, 0);
+  if(socketFd == -1) errExit(18);
   if (connect(socketFd, (struct sockaddr *)&proxyAddr, sizeof(struct sockaddr_in)) == 0) {
     ssize_t writtenSize = 0;
     ssize_t readSize = 0;

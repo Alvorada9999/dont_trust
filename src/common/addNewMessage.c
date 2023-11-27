@@ -15,10 +15,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-void addNewMessage(AllMessages *allMessages, char *message, uint16_t size) {
+#include <signal.h>
+#include <unistd.h>
+
+void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner) {
   char *text = malloc(size);
   memcpy(text, message, size);
 
@@ -40,4 +45,29 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size) {
 
   allMessages->lastMessage = newMessage;
   allMessages->sizeInChars += size;
+
+  if(owner == MESSAGE_FROM_MYSELF) {
+    if(allMessages->messagesByCode.availableSpace > 0) {
+      allMessages->messagesByCode.array[allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace] = newMessage;
+      allMessages->messagesByCode.availableSpace--;
+    } else {
+      Message **newArray = malloc(sizeof(Message)*allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
+      memcpy(newArray, allMessages->messagesByCode.array, allMessages->messagesByCode.currentSize);
+      free(allMessages->messagesByCode.array);
+      allMessages->messagesByCode.array = newArray;
+      allMessages->messagesByCode.currentSize = allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
+
+      allMessages->messagesByCode.array[allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace] = newMessage;
+      allMessages->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY-1;
+    }
+    allMessages->messagesByCode.length++;
+  } else {
+    newMessage->status = RECEIVED;
+  }
+
+  if(!allMessages->socketOutputStatus.isThereAnythingBeingSent && allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
+    static union sigval sigVal;
+    // sigVal.sival_int = 3;
+    sigqueue(getpid(), SIGRTMIN, sigVal);
+  }
 }

@@ -14,16 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
-#include <stdint.h>
-#include <signal.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_PROXY_PORT 9050
+#include <string.h>
+#include <sys/socket.h>
 
-int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
-int8_t startServer(void);
-int8_t simpleConnect(void);
+#include "net.h"
+#include "error.h"
 
-#endif // !DTNET
+int8_t simpleConnect(void) {
+  struct sockaddr_in peerAddr;
+  memset(&peerAddr, 0, sizeof(struct sockaddr_in));
+  peerAddr.sin_family = AF_INET;
+  peerAddr.sin_port = htons(DEFAULT_SERVER_PORT);
+  peerAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+  int8_t socketFd = socket(AF_INET, SOCK_STREAM, 0);
+  if(socketFd == -1) errExit(18);
+
+  if(connect(socketFd, (struct sockaddr *)&peerAddr, sizeof(struct sockaddr_in)) == -1) errExit(22);
+
+  return socketFd;
+}

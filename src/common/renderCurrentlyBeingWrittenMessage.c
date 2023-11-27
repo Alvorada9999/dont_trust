@@ -23,8 +23,6 @@
 #include "common.h"
 
 void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize) {
-  if(inputBufferSize < 1) return;
-
   struct winsize winSize;
   memset(&winSize, 0, sizeof(struct winsize));
   ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);
@@ -32,12 +30,8 @@ void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSi
   if(winSize.ws_row < 2) return;
   
   if(inputBufferSize > winSize.ws_col) {
-    // printf("\033[H\033[%iB\033[0K", winSize.ws_row-2);
-    // printf("%.*s", winSize.ws_col, inputBufer+(inputBufferSize-winSize.ws_col));
     printf("\033[H\033[%iB\033[0K%.*s", winSize.ws_row-2, winSize.ws_col, inputBufer+(inputBufferSize-winSize.ws_col));
   } else {
-    // printf("\033[H\033[%iB\033[0K", winSize.ws_row-2);
-    // printf("%.*s", inputBufferSize, inputBufer);
     printf("\033[H\033[%iB\033[0K%.*s", winSize.ws_row-2, inputBufferSize, inputBufer);
   }
   fflush(stdout);

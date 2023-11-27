@@ -1,0 +1,10 @@
+There are only a few permitted byte options to be transmitted, documented as follows:
+
+"1" starts a message transmission, after comes:
+- an unsigned 32 bit number in network byte order, that's the message code
+- an unsigned 16 bit number in network byte order containing the message size
+- the message (only between "31" and "127", connection closed otherwise)
+
+"2" starts messages confirmations, after comes:
+- an unsigned 32 bit number in network byte order, that's the number of confirmations codes
+- an unsigned 32 bit numbers in network byte order, each being a message code from a particular message (Only your own messages have their code saved)

@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
-#include <stdint.h>
 #include <signal.h>
+#include <stdlib.h>
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_PROXY_PORT 9050
-
-int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
-int8_t startServer(void);
-int8_t simpleConnect(void);
-
-#endif // !DTNET
+void blockAllSignalsWithHandlersThatUseMalloc(void) {
+  static sigset_t set;
+  sigemptyset(&set);
+  sigaddset(&set, SIGRTMIN);
+  sigprocmask(SIG_BLOCK, &set, NULL);
+}

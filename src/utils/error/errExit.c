@@ -21,7 +21,7 @@
 #include "error.h"
 
 void errExit(uint16_t errCode) {
-  char *errors[20];
+  char *errors[40];
   errors[1] = "Error when blocking all signals\n";
   errors[2] = "Error unblocking int and winch signals\n";
   errors[3] = "Error setting terminal in break state\n";
@@ -38,6 +38,18 @@ void errExit(uint16_t errCode) {
   errors[13] = "Proxy connection request error: Command not supported / protocol error\n";
   errors[14] = "Proxy connection request error: Address type not supported\n";
   errors[15] = "Error when trying to connect socket program tcp socket to tor socks proxy\n";
+
+  errors[16] = "Peer closed the connection\n";
+  errors[17] = "Invalid protocol option received\n";
+
+  errors[18] = "Error when trying to create socket\n";
+  errors[19] = "Error when trying to bind address to socket\n";
+  errors[20] = "Error when trying to listen on port\n";
+  errors[21] = "Error when trying to accept connection\n";
+  errors[22] = "Error when trying to establishing connection\n";
+  errors[23] = "Peer sent invalid message size\n";
+  errors[24] = "Peer sent invalid message value\n";
+  errors[25] = "Peer sent invalid message confirmation code\n";
 
   printf("%s", errors[errCode]);
   fflush(stdout);

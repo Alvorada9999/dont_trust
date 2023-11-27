@@ -14,16 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
-#include <stdint.h>
-#include <signal.h>
+#define _GNU_SOURCE
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_PROXY_PORT 9050
+#include <string.h>
 
-int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
-int8_t startServer(void);
-int8_t simpleConnect(void);
+#include <fcntl.h>
+#include <unistd.h>
 
-#endif // !DTNET
+#include "init.h"
+
+void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_t *, void *)) {
+  struct sigaction newSigAction;
+  memset(&newSigAction, 0, sizeof(struct sigaction));
+  newSigAction.sa_sigaction = handler;
+  newSigAction.sa_flags = SA_SIGINFO;
+  sigaction(SIGRTMIN, &newSigAction, NULL);
+
+  fcntl(socketFd, F_SETOWN, getpid());
+
+  int32_t fileStatusFlags = fcntl(socketFd, F_GETFL);
+  fcntl(socketFd, F_SETFL, fileStatusFlags | O_ASYNC | O_NONBLOCK);
+
+  fcntl(socketFd, F_SETSIG, SIGRTMIN);
+}

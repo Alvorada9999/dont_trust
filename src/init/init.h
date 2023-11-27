@@ -17,6 +17,8 @@
 #ifndef init
 #define init
 #include <stdbool.h>
+#include <stdint.h>
+#include <signal.h>
 
 typedef struct {
   char *ipV4;
@@ -24,6 +26,7 @@ typedef struct {
   bool shouldActAsServer;
 } Configs;
 
-void getConfigs(int argc, char *argv[], Configs *commandLineOptions);
+void getConfigs(int argc, char *argv[], Configs *configsToUpdate);
+void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_t *, void *));
 
 #endif // !init

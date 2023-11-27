@@ -14,20 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <signal.h>
-#include <stdlib.h>
+#include <arpa/inet.h>
 
-#include "error.h"
+#include "common.h"
 
-int unblockIntAndWinchSignals(void) {
-  sigset_t sigSet;
-  if(sigemptyset(&sigSet) == -1)
-    errExit(2);
-  if(sigaddset(&sigSet, SIGINT) == -1)
-    errExit(2);
-  if(sigaddset(&sigSet, SIGWINCH) == -1)
-    errExit(2);
-  if(sigprocmask(SIG_UNBLOCK, &sigSet, NULL) == -1)
-    errExit(2);
-  return 0;
+void updateSentMessageStatusAsPeerReadByMessageCode(AllMessages *allMessages, uint32_t messageCode) {
+  if(messageCode <= allMessages->messagesByCode.currentSize) {
+    allMessages->messagesByCode.array[messageCode]->status = PEER_READ;
+  }
 }

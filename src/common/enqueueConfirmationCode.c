@@ -14,16 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
-#include <stdint.h>
-#include <signal.h>
+#include <stdlib.h>
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_PROXY_PORT 9050
+#include "common.h"
 
-int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
-int8_t startServer(void);
-int8_t simpleConnect(void);
+void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t codeInNetworkByteOrder) {
+  MessageCode *messageCode = malloc(sizeof(MessageCode));
+  messageCode->next = NULL;
+  messageCode->codeInNetworkByteOrder = codeInNetworkByteOrder;
 
-#endif // !DTNET
+  if(queue->size < 1) {
+    queue->firstElement = messageCode;
+    queue->lastElement = messageCode;
+    queue->size = 1;
+  } else {
+    queue->lastElement->next = messageCode;
+    queue->lastElement = messageCode;
+  }
+}

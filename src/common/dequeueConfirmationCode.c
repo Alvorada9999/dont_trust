@@ -14,16 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <signal.h>
 #include <stdlib.h>
 
-#include "error.h"
+#include "common.h"
 
-int blockAllSignals(void) {
-  sigset_t sigSetToBlock;
-  if(sigfillset(&sigSetToBlock) != 0)
-    errExit(1);
-  if(sigprocmask(SIG_SETMASK, &sigSetToBlock, NULL) != 0)
-    errExit(1);
+uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue) {
+  if(queue->size > 0) {
+    uint32_t messageCodeInNetworkByteOrder = queue->firstElement->codeInNetworkByteOrder;
+    if(queue->size == 1) {
+      queue->firstElement = NULL;
+      queue->lastElement = NULL;
+      queue->size = 0;
+    } else {
+      queue->firstElement = queue->firstElement->next;
+      queue->size = queue->size--;
+    }
+    free(queue->firstElement);
+    return messageCodeInNetworkByteOrder;
+  }
   return 0;
 }

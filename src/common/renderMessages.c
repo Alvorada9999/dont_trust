@@ -185,6 +185,7 @@ int8_t renderMessages(AllMessages *allMessages) {
     }
 
   } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize);
+  addResetBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
 
   ssize_t writtenSize = 0;
   while(writtenSize > -1 && writtenSize < maxWritingSize) {

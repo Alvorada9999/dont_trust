@@ -17,7 +17,10 @@
 #ifndef DTSIGNALUTIL
 #define DTSIGNALUTIL
 
-int blockAllSignals(void);
-int unblockIntAndWinchSignals(void);
+#include <stdint.h>
+
+void showSiCodeInfo(int32_t siCode);
+void blockAllSignalsWithHandlersThatUseMalloc(void);
+void unblockAllSignalsWithHandlersThatUseMalloc(void);
 
 #endif
