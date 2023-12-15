@@ -20,10 +20,15 @@
 #include <stdint.h>
 #include <signal.h>
 
+#define ONION_ADDR 0
+#define IPV4_ADDR 1
+
 typedef struct {
   char *ipV4;
-  //is true when the above is not given
+  char *onionAddress;
+  //is true when the any of the above is not given
   bool shouldActAsServer;
+  int8_t chosenOption;
 } Configs;
 
 void getConfigs(int argc, char *argv[], Configs *configsToUpdate);

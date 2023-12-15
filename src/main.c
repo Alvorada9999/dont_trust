@@ -35,8 +35,6 @@ void sigWinchHandler(int sigNumber) {
   renderMessages(&allMessages);
 }
 
-bool isThereSpaceOnSocketSendBuffer = true;
-
 void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
   static MessageCodesToBeSentBackQueue messageCodesToBeSentBackAsConfirmationQueue = { .firstElement = NULL, .lastElement = NULL, .size = 0 };
 
@@ -360,7 +358,14 @@ int main(int argc, char *argv[]) {
   if(configs.shouldActAsServer) {
     peerConnectedSocket = startServer();
   } else {
-    peerConnectedSocket = simpleConnect();
+    switch (configs.chosenOption) {
+      case IPV4_ADDR:
+        peerConnectedSocket = simpleConnect(configs.ipV4);
+        break;
+      case ONION_ADDR:
+        peerConnectedSocket = connectToTorSocksProxy(configs.onionAddress, DEFAULT_SERVER_PORT);
+        break;
+    }
   }
   allMessages.socketOutputStatus.fd = peerConnectedSocket;
   enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);

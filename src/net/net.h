@@ -24,6 +24,6 @@
 
 int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
 int8_t startServer(void);
-int8_t simpleConnect(void);
+int8_t simpleConnect(char *addr);
 
 #endif // !DTNET

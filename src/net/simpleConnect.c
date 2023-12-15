@@ -23,12 +23,12 @@
 #include "net.h"
 #include "error.h"
 
-int8_t simpleConnect(void) {
+int8_t simpleConnect(char *addr) {
   struct sockaddr_in peerAddr;
   memset(&peerAddr, 0, sizeof(struct sockaddr_in));
   peerAddr.sin_family = AF_INET;
   peerAddr.sin_port = htons(DEFAULT_SERVER_PORT);
-  peerAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  inet_pton(AF_INET, addr, &peerAddr.sin_addr);
 
   int8_t socketFd = socket(AF_INET, SOCK_STREAM, 0);
   if(socketFd == -1) errExit(18);

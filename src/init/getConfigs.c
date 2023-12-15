@@ -14,40 +14,59 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
+#include <arpa/inet.h>
 #include <stdbool.h>
 
 #include "init.h"
 
-bool isLineOptionValid(char *string, char *array[]) {
-  for(int i=0; i<2; i++) {
-    if(strcmp(string, array[i]) == 0) {
-      return true;
-    }
+bool isValidOnionAddress(char *addr) {
+  if(strlen(addr) != 62) {
+    return false;
   }
-  return false;
+  if(strcmp(addr+55, "d.onion") != 0) {
+    return false;
+  }
+  return true;
 }
 
 void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
-  char *comandLineOptions[] = {"-h\0", "-c\0"};
   char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n-c   Connects to an IPv4\n-h   This help message\n";
-  for(int i=0; i<argc; i++) {
-    if(argv[i][0] == '-' && isLineOptionValid(argv[i], comandLineOptions) == false) {
-      printf("\nInvalid line option \"%s\"\n", argv[i]);
-      exit(EXIT_SUCCESS);
-    }
-    if(strcmp(argv[i], comandLineOptions[0]) == 0) {
-      printf("%s", helpMessage);
-      exit(EXIT_SUCCESS);
-    } else if(strcmp(argv[i], comandLineOptions[1]) == 0) {
-      if(argv[i+1] == NULL) {
-        printf("Should provide IPv4 address\n");
-        exit(EXIT_SUCCESS);
+  int16_t option;
+  while((option = getopt(argc, argv, "ht:o:")) != -1) {
+    switch (option) {
+      case 't': {
+        struct in_addr addrptr;
+        if(inet_pton(AF_INET, optarg, &addrptr) == 0) {
+          printf("Invalid ipv4 address");
+          exit(EXIT_SUCCESS);
+        }
+
+        option = -1;
+        commandLineOptions -> shouldActAsServer = false;
+        commandLineOptions -> ipV4 = optarg;
+        commandLineOptions -> chosenOption = IPV4_ADDR;
+        break;
       }
-      commandLineOptions -> shouldActAsServer = false;
-      commandLineOptions -> ipV4 = argv[i+1];
+      case 'o':
+        if(isValidOnionAddress(optarg) == false) {
+          printf("Invalid onion address\n");
+          exit(EXIT_SUCCESS);
+        }
+
+        option = -1;
+        commandLineOptions -> shouldActAsServer = false;
+        commandLineOptions -> onionAddress = optarg;
+        commandLineOptions -> chosenOption = ONION_ADDR;
+        break;
+      case 'h':
+        printf("%s", helpMessage);
+        exit(EXIT_SUCCESS);
+      case '?':
+        exit(EXIT_SUCCESS);
     }
   }
 }
