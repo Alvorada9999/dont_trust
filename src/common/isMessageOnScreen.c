@@ -14,15 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
 #include <stdint.h>
+#include "common.h"
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_PROXY_PORT 9050
-
-int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
-int8_t startServer(void);
-int8_t simpleConnect(char *addr);
-
-#endif // !DTNET
+bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode) {
+  for(uint16_t i=0; i<DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW; i++) {
+    if(allMessages->messagesBeingShowCode[i] == messageCode) return true;
+  }
+  return false;
+}

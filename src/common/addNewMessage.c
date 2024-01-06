@@ -47,6 +47,7 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
   allMessages->sizeInChars += size;
 
   if(owner == MESSAGE_FROM_MYSELF) {
+    newMessage->code = allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace;
     if(allMessages->messagesByCode.availableSpace > 0) {
       allMessages->messagesByCode.array[allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace] = newMessage;
       allMessages->messagesByCode.availableSpace--;

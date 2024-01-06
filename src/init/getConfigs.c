@@ -34,7 +34,7 @@ bool isValidOnionAddress(char *addr) {
 }
 
 void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
-  char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n-c   Connects to an IPv4\n-h   This help message\n";
+  char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n-t   Connects to an IPv4\n-o Connects to an hidden service\n-h   This help message\n";
   int16_t option;
   while((option = getopt(argc, argv, "ht:o:")) != -1) {
     switch (option) {

@@ -24,6 +24,7 @@
 #define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
 #define MAX_MESSAGE_SIZE 65535
 #define DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY 1000
+#define DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW 1000
 
 enum MessageStatus {
   PEER_NOT_READ = 1,
@@ -62,6 +63,8 @@ struct Message {
   struct Message *nextMessage;
   struct Message *previousMessage;
   uint8_t status;
+  //Peer messages don't have code
+  uint32_t code;
 };
 
 typedef struct Message Message;
@@ -88,6 +91,15 @@ typedef struct {
   Message *currentStartingMessage;
   unsigned int currentStartingMessageCharPosition;
   Message *lastMessage;
+
+  // --- when adding message & when receiving message ---
+  bool isThereSpaceLeftOnScreenForMoreMessages;
+  // ----------------------------------------------------
+
+  // --- when receiving confirmation ---
+  uint16_t numberOfMessagesBeingShow;
+  uint32_t messagesBeingShowCode[DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW];
+  // -----------------------------------
 
   MessagesByCodeArray messagesByCode;
 
@@ -119,5 +131,6 @@ typedef struct {
 
 void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t code);
 uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue);
+bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
 
 #endif // !DTCOMMON

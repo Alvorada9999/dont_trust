@@ -1,0 +1,4 @@
+renderMessages() can at some cases show some but not all messages (That should be show) even when height*(lenght-2) of the terminal dont suprass DEFAULT_MESSAGE_OUTPUT_SIZE, reason:
+some of the available terminal space is used to send scape sequences (ex: when changing colors) or when some row must be skipped
+if that bothers you at some instance, do the following:
+increase the value of "DEFAULT_MESSAGE_OUTPUT_SIZE" to some some value that suits your needs

@@ -122,6 +122,9 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
 
               //add message to allMessages
               addNewMessage(&allMessages, message, messageSize, MESSAGE_FROM_PEER);
+              if(allMessages.isThereSpaceLeftOnScreenForMoreMessages) {
+                raise(SIGWINCH);
+              }
               //add message code to be sent back as confirmation
               enqueueMessageCode(&messageCodesToBeSentBackAsConfirmationQueue, messageCodeInNetworkByteOrder);
 
@@ -136,6 +139,8 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
               break;
             }
             case READING_MESSAGES_CONFIRMATIONS: {
+              static bool isAnyOfTheMessagesFromCodesOnScreen = false;
+
               static char numberOfConfirmationCodesBuffer[4];
               static uint8_t numberOfReadBytesNumberOfConfirmationCodes = 0;
               if(numberOfReadBytesNumberOfConfirmationCodes < 4) {
@@ -170,6 +175,9 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
                     messageConfirmationCode = ntohl(messageConfirmationCode);
                     if(messageConfirmationCode < 0 || messageConfirmationCode > allMessages.messagesByCode.length) errExit(25);
                     updateSentMessageStatusAsPeerReadByMessageCode(&allMessages, messageConfirmationCode);
+                    if(isMessageOnScreen(&allMessages, messageConfirmationCode)) {
+                      isAnyOfTheMessagesFromCodesOnScreen = true;
+                    }
 
                     //if there is more codes to get, go to the next
                     if(receivedNumberOfConfirmationsCodes < numberOfConfirmationCodes) {
@@ -187,6 +195,10 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
               receivedNumberOfConfirmationsCodes = 0;
               numberOfReadBytesFromMessageConfirmationCodes = 0;
               readingStatus = READING_NOTHING;
+
+              if(isAnyOfTheMessagesFromCodesOnScreen) {
+                raise(SIGWINCH);
+              }
 
               break;
             }
@@ -327,6 +339,7 @@ int main(int argc, char *argv[]) {
   allMessages.currentStartingMessage = NULL;
   allMessages.currentStartingMessageCharPosition = 0;
   allMessages.lastMessage = NULL;
+  allMessages.isThereSpaceLeftOnScreenForMoreMessages = true;
 
   allMessages.messagesByCode.array = malloc(sizeof(Message)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
   allMessages.messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
@@ -346,6 +359,8 @@ int main(int argc, char *argv[]) {
   newSigAction.sa_handler = NULL;
   newSigAction.sa_sigaction = &handleSocketIo;
   newSigAction.sa_flags = SA_SIGINFO;
+  sigemptyset(&newSigAction.sa_mask);
+  sigaddset(&newSigAction.sa_mask, SIGWINCH);
   sigaction(SIGRTMIN, &newSigAction, NULL);
 
   Configs configs;
@@ -400,7 +415,9 @@ int main(int argc, char *argv[]) {
                 blockAllSignalsWithHandlersThatUseMalloc();
                 addNewMessage(&allMessages, inputBuffer, inputBufferSize, MESSAGE_FROM_MYSELF);
                 unblockAllSignalsWithHandlersThatUseMalloc();
-                raise(SIGWINCH);
+                if(allMessages.isThereSpaceLeftOnScreenForMoreMessages) {
+                  raise(SIGWINCH);
+                }
                 inputBufferSize = 0;
               }
               break;

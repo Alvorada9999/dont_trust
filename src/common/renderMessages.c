@@ -95,7 +95,14 @@ void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToO
   }
 }
 
+/*
+ * Render if:
+ * - At least 3 rows are available on terminal
+ * - As long the height*(lenght-2) of the terminal dont suprass DEFAULT_MESSAGE_OUTPUT_SIZE
+*/
 int8_t renderMessages(AllMessages *allMessages) {
+  allMessages->numberOfMessagesBeingShow = 0;
+
   //stop if there are no messages
   if(allMessages->currentStartingMessage == NULL) return 0;
   struct winsize winSize;
@@ -174,6 +181,8 @@ int8_t renderMessages(AllMessages *allMessages) {
     }
     remainingRowSpace = winSize.ws_col;
 
+    allMessages->numberOfMessagesBeingShow += 1;
+    allMessages->messagesBeingShowCode[allMessages->numberOfMessagesBeingShow] = currentMessage->code;
 
     currentMessage = currentMessage->nextMessage;
     currentMessageReadSizeInBytes = 0;
@@ -184,8 +193,14 @@ int8_t renderMessages(AllMessages *allMessages) {
       updateBackgroundColor(currentMessage->status, textToOutput, &textToOutputWrittenSize, &maxWritingSize);
     }
 
-  } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize);
+  } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize && allMessages->numberOfMessagesBeingShow < DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW);
   addResetBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
+
+  if(maxWritingSize >= winSize.ws_col) {
+    allMessages->isThereSpaceLeftOnScreenForMoreMessages = true;
+  } else {
+    allMessages->isThereSpaceLeftOnScreenForMoreMessages = false;
+  }
 
   ssize_t writtenSize = 0;
   while(writtenSize > -1 && writtenSize < maxWritingSize) {
