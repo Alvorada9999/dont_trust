@@ -354,6 +354,12 @@ int main(int argc, char *argv[]) {
     }
   }
   allMessages.socketOutputStatus.fd = peerConnectedSocket;
+
+  struct sigaction newSigAction;
+  memset(&newSigAction, 0, sizeof(struct sigaction));
+  newSigAction.sa_handler = &sigWinchHandler;
+  sigaction(SIGWINCH, &newSigAction, NULL);
+
   enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
 
   //default values
@@ -371,19 +377,6 @@ int main(int argc, char *argv[]) {
 
   allMessages.socketOutputStatus.isThereAnythingBeingSent = false;
   allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
-
-  struct sigaction newSigAction;
-  memset(&newSigAction, 0, sizeof(struct sigaction));
-
-  newSigAction.sa_handler = &sigWinchHandler;
-  sigaction(SIGWINCH, &newSigAction, NULL);
-
-  newSigAction.sa_handler = NULL;
-  newSigAction.sa_sigaction = &handleSocketIo;
-  newSigAction.sa_flags = SA_SIGINFO;
-  sigemptyset(&newSigAction.sa_mask);
-  sigaddset(&newSigAction.sa_mask, SIGWINCH);
-  sigaction(SIGRTMIN, &newSigAction, NULL);
 
   struct termios oldTerminalConfigurations;
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));

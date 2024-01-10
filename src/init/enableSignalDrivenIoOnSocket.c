@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "init.h"
 
@@ -28,6 +29,8 @@ void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_
   memset(&newSigAction, 0, sizeof(struct sigaction));
   newSigAction.sa_sigaction = handler;
   newSigAction.sa_flags = SA_SIGINFO;
+  sigemptyset(&newSigAction.sa_mask);
+  sigaddset(&newSigAction.sa_mask, SIGWINCH);
   sigaction(SIGRTMIN, &newSigAction, NULL);
 
   fcntl(socketFd, F_SETOWN, getpid());
