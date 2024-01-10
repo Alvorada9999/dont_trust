@@ -334,6 +334,28 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
 }
 
 int main(int argc, char *argv[]) {
+  Configs configs;
+  memset(&configs, 0, sizeof(Configs));
+  configs.shouldActAsServer = true;
+
+  getConfigs(argc, argv, &configs);
+
+  int8_t peerConnectedSocket = 0;
+  if(configs.shouldActAsServer) {
+    peerConnectedSocket = startServer();
+  } else {
+    switch (configs.chosenOption) {
+      case IPV4_ADDR:
+        peerConnectedSocket = simpleConnect(configs.ipV4);
+        break;
+      case ONION_ADDR:
+        peerConnectedSocket = connectToTorSocksProxy(configs.onionAddress, DEFAULT_SERVER_PORT);
+        break;
+    }
+  }
+  allMessages.socketOutputStatus.fd = peerConnectedSocket;
+  enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
+
   //default values
   allMessages.sizeInChars = 0;
   allMessages.currentStartingMessage = NULL;
@@ -362,28 +384,6 @@ int main(int argc, char *argv[]) {
   sigemptyset(&newSigAction.sa_mask);
   sigaddset(&newSigAction.sa_mask, SIGWINCH);
   sigaction(SIGRTMIN, &newSigAction, NULL);
-
-  Configs configs;
-  memset(&configs, 0, sizeof(Configs));
-  configs.shouldActAsServer = true;
-
-  getConfigs(argc, argv, &configs);
-
-  int8_t peerConnectedSocket = 0;
-  if(configs.shouldActAsServer) {
-    peerConnectedSocket = startServer();
-  } else {
-    switch (configs.chosenOption) {
-      case IPV4_ADDR:
-        peerConnectedSocket = simpleConnect(configs.ipV4);
-        break;
-      case ONION_ADDR:
-        peerConnectedSocket = connectToTorSocksProxy(configs.onionAddress, DEFAULT_SERVER_PORT);
-        break;
-    }
-  }
-  allMessages.socketOutputStatus.fd = peerConnectedSocket;
-  enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
 
   struct termios oldTerminalConfigurations;
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
