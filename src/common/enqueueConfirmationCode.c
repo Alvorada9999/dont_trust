@@ -30,5 +30,6 @@ void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t codeInNet
   } else {
     queue->lastElement->next = messageCode;
     queue->lastElement = messageCode;
+    queue->size++;
   }
 }

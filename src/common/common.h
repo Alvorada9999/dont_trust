@@ -70,12 +70,17 @@ struct Message {
 typedef struct Message Message;
 
 typedef struct {
-  //the values of those fields are used only by the addNewMessage function in order
+  //this value is used only by the addNewMessage function in order
   //to know if the signal handler for socket io should be raised
   bool isThereAnythingBeingSent;
+
   bool isThereAnySpaceOnTheSocketSendBuffer;
   int8_t fd;
 } SocketOutputStatus;
+
+typedef struct {
+  bool isInputAvailable;
+} SocketInputStatus;
 
 typedef struct {
   //this field stores only the messages I sent starging from the first one on the 0 index
@@ -104,6 +109,7 @@ typedef struct {
   MessagesByCodeArray messagesByCode;
 
   SocketOutputStatus socketOutputStatus;
+  SocketInputStatus socketInputStatus;
 } AllMessages;
 
 void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner);
@@ -132,5 +138,9 @@ typedef struct {
 void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t code);
 uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue);
 bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
+
+void processInput(AllMessages *allMessages);
+void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
+void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
 
 #endif // !DTCOMMON
