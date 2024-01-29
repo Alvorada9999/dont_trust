@@ -75,7 +75,6 @@ typedef struct {
   bool isThereAnythingBeingSent;
 
   bool isThereAnySpaceOnTheSocketSendBuffer;
-  int8_t fd;
 } SocketOutputStatus;
 
 typedef struct {

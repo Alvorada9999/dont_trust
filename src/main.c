@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
         break;
     }
   }
-  allMessages.socketOutputStatus.fd = peerConnectedSocket;
 
   struct sigaction newSigAction;
   memset(&newSigAction, 0, sizeof(struct sigaction));
@@ -107,10 +106,10 @@ int main(int argc, char *argv[]) {
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
-      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &allMessages.socketOutputStatus.fd);
+      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket);
     }
     if(allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
-      writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &allMessages.socketOutputStatus.fd);
+      writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket);
     }
     processInput(&allMessages);
   }
