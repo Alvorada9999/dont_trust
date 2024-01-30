@@ -47,12 +47,18 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
   switch (event) {
     case POLL_IN: {
       allMessages.socketInputStatus.isInputAvailable = true;
+      break;
     }
     case POLL_OUT: {
       allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
       break;
     }
   }
+}
+
+struct termios oldTerminalConfigurations;
+void resetTerminal(void) {
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldTerminalConfigurations);
 }
 
 int main(int argc, char *argv[]) {
@@ -100,9 +106,9 @@ int main(int argc, char *argv[]) {
   allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
   allMessages.socketInputStatus.isInputAvailable = false;
 
-  struct termios oldTerminalConfigurations;
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
   setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
+  atexit(&resetTerminal);
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
@@ -113,8 +119,4 @@ int main(int argc, char *argv[]) {
     }
     processInput(&allMessages);
   }
-
-  resetTerminal(STDIN_FILENO, &oldTerminalConfigurations);
-
-  return 0;
 }

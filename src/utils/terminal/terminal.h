@@ -26,7 +26,6 @@
 #include <termios.h>
 
 int setCbreak(int fd, struct termios *prevTermios);
-void resetTerminal(int fd, struct termios *termiosAttr);
 void clearTerminal(void);
 
 #endif
