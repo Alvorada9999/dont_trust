@@ -70,8 +70,10 @@ int main(int argc, char *argv[]) {
 
   int8_t peerConnectedSocket = 0;
   if(configs.shouldActAsServer) {
+    printNow("Waiting connection\n");
     peerConnectedSocket = startServer();
   } else {
+    printNow("Establishing connection\n");
     switch (configs.chosenOption) {
       case IPV4_ADDR:
         peerConnectedSocket = simpleConnect(configs.ipV4);
@@ -81,30 +83,16 @@ int main(int argc, char *argv[]) {
         break;
     }
   }
+  printNow("Connection established\n");
 
   struct sigaction newSigAction;
   memset(&newSigAction, 0, sizeof(struct sigaction));
   newSigAction.sa_handler = &sigWinchHandler;
   sigaction(SIGWINCH, &newSigAction, NULL);
 
+  setDefaultValues(&allMessages);
+
   enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
-
-  //default values
-  allMessages.sizeInChars = 0;
-  allMessages.currentStartingMessage = NULL;
-  allMessages.currentStartingMessageCharPosition = 0;
-  allMessages.lastMessage = NULL;
-  allMessages.isThereSpaceLeftOnScreenForMoreMessages = true;
-
-  allMessages.messagesByCode.array = malloc(sizeof(Message)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
-  allMessages.messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
-  allMessages.messagesByCode.currentSize = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
-  allMessages.messagesByCode.length = 0;
-  allMessages.messagesByCode.numberOfSentMessages = 0;
-
-  allMessages.socketOutputStatus.isThereAnythingBeingSent = false;
-  allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
-  allMessages.socketInputStatus.isInputAvailable = false;
 
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
   setCbreak(STDIN_FILENO, &oldTerminalConfigurations);

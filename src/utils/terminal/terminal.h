@@ -27,5 +27,6 @@
 
 int setCbreak(int fd, struct termios *prevTermios);
 void clearTerminal(void);
+void printNow(char *string);
 
 #endif

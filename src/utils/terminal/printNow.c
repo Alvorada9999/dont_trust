@@ -14,26 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef init
-#define init
-#include <stdbool.h>
-#include <stdint.h>
-#include <signal.h>
-#include <common.h>
+#include <stdio.h>
 
-#define ONION_ADDR 0
-#define IPV4_ADDR 1
-
-typedef struct {
-  char *ipV4;
-  char *onionAddress;
-  //is true when the any of the above is not given
-  bool shouldActAsServer;
-  int8_t chosenOption;
-} Configs;
-
-void getConfigs(int argc, char *argv[], Configs *configsToUpdate);
-void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_t *, void *));
-void setDefaultValues(AllMessages *allMessages);
-
-#endif // !init
+void printNow(char *string) {
+  printf("%s", string);
+  fflush(stdout);
+}
