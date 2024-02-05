@@ -19,7 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <signal.h>
-#include <common.h>
+
+#include "common.h"
 
 #define ONION_ADDR 0
 #define IPV4_ADDR 1
