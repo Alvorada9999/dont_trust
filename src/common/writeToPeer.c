@@ -132,6 +132,8 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
 
       allMessages->messagesByCode.numberOfSentMessages += 1;
 
+      renderStatus(MESSAGE_SENT, &allMessages->winSize);
+
       break;
     }
 

@@ -108,6 +108,8 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
           messageReadSize = 0;
           readingStatus = READING_NOTHING;
 
+          renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
+
           break;
         }
         case READING_MESSAGES_CONFIRMATIONS: {
@@ -171,6 +173,8 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
           if(isAnyOfTheMessagesFromCodesOnScreen) {
             raise(SIGWINCH);
           }
+
+          renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
 
           break;
         }

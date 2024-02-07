@@ -105,9 +105,7 @@ int8_t renderMessages(AllMessages *allMessages) {
 
   //stop if there are no messages
   if(allMessages->currentStartingMessage == NULL) return 0;
-  struct winsize winSize;
-  memset(&winSize, 0, sizeof(struct winsize));
-  ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);
+  struct winsize winSize = allMessages->winSize;
   // the last two rows are used to show some info and the text that is currently being typed
   // the value at the right side of the equation won't be negative so no problem between different signedness, don't bother :)
   u_int32_t amountOfCharsThatCanBeShow = (winSize.ws_row - 2) * winSize.ws_col;
@@ -202,10 +200,14 @@ int8_t renderMessages(AllMessages *allMessages) {
     allMessages->isThereSpaceLeftOnScreenForMoreMessages = false;
   }
 
-  ssize_t writtenSize = 0;
-  while(writtenSize > -1 && writtenSize < maxWritingSize) {
-    writtenSize += write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize-writtenSize);
+  static ssize_t writtenSize = 0;
+  static ssize_t result = 0;
+  while(result > -1 && writtenSize < maxWritingSize) {
+    result = write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize-writtenSize);
+    writtenSize += result;
   }
+  writtenSize = 0;
+  result = 0;
 
   return 0;
 }

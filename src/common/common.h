@@ -19,7 +19,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <sys/types.h>
+#include <sys/ioctl.h>
 
 #define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
 #define MAX_MESSAGE_SIZE 65535
@@ -55,6 +57,12 @@ enum ApplicationStatus {
 enum MessageOwner {
   MESSAGE_FROM_PEER = 1,
   MESSAGE_FROM_MYSELF = 2
+};
+
+enum TypeOfReceivedMessage {
+  MESSAGE_SENT = 1,
+  MESSAGE_CONFIRMATION_RECEIVED = 2,
+  MESSAGE_RECEIVED = 3
 };
 
 struct Message {
@@ -109,10 +117,12 @@ typedef struct {
 
   SocketOutputStatus socketOutputStatus;
   SocketInputStatus socketInputStatus;
+
+  struct winsize winSize;
 } AllMessages;
 
 void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner);
-void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize);
+void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize, struct winsize *winSize);
 
 int8_t renderMessages(AllMessages *allMessages);
 int8_t updatePostion(AllMessages *allMessages, char jOrK);
@@ -141,5 +151,7 @@ bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
 void processInput(AllMessages *allMessages);
 void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
 void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
+
+void renderStatus(uint8_t type, struct winsize *winSize);
 
 #endif // !DTCOMMON

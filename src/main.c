@@ -30,7 +30,8 @@ AllMessages allMessages;
 MessageCodesToBeSentBackQueue messageCodesToBeSentBackAsConfirmationQueue = { .firstElement = NULL, .lastElement = NULL, .size = 0 };
 
 void sigWinchHandler(int sigNumber) {
-  clearTerminal();
+  ioctl(STDIN_FILENO, TIOCGWINSZ, &allMessages.winSize);
+  clearMessages(&allMessages.winSize);
   renderMessages(&allMessages);
 }
 

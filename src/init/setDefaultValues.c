@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <sys/ioctl.h>
+#include <unistd.h>
+
 #include "init.h"
 
 void setDefaultValues(AllMessages *allMessages) {
@@ -35,4 +38,6 @@ void setDefaultValues(AllMessages *allMessages) {
   allMessages->socketOutputStatus.isThereAnythingBeingSent = false;
   allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
   allMessages->socketInputStatus.isInputAvailable = false;
+
+  ioctl(STDIN_FILENO, TIOCGWINSZ, &allMessages->winSize);
 }

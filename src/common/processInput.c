@@ -41,7 +41,7 @@ void processInput(AllMessages *allMessages) {
           case DEL:
             if(inputBufferSize > 0) {
               inputBufferSize -= 1;
-              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize);
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
             }
             break;
           case LINEFEED:
@@ -51,6 +51,7 @@ void processInput(AllMessages *allMessages) {
                 raise(SIGWINCH);
               }
               inputBufferSize = 0;
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
             }
             break;
           default:
@@ -58,7 +59,7 @@ void processInput(AllMessages *allMessages) {
             if(inputBufferSize < MAX_MESSAGE_SIZE && *(processingBuffer+i) > 31 && *(processingBuffer+i) < 127) {
               inputBuffer[inputBufferSize] = processingBuffer[i];
               inputBufferSize += 1;
-              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize);
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
             }
         }
         break;

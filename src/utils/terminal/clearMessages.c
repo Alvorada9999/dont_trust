@@ -16,18 +16,10 @@
 
 #include <stdio.h>
 
-#include <sys/ioctl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
-#include "common.h"
-
-void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize, struct winsize *winSize) {
-  if(winSize->ws_row < 2) return;
-  
-  if(inputBufferSize > winSize->ws_col) {
-    printf("\033[H\033[%iB\033[0K%.*s", winSize->ws_row-2, winSize->ws_col, inputBufer+(inputBufferSize-winSize->ws_col));
-  } else {
-    printf("\033[H\033[%iB\033[0K%.*s", winSize->ws_row-2, inputBufferSize, inputBufer);
-  }
+void clearMessages(struct winsize *winSize) {
+  printf("\033[%i;%iH\033[1J\033[3J\033[H", (*winSize).ws_row-2, (*winSize).ws_col);
   fflush(stdout);
 }

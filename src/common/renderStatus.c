@@ -14,13 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string.h>
+
+#include <stdint.h>
+#include <stdio.h>
 
 #include <unistd.h>
+#include <sys/ioctl.h>
 
-void clearTerminal(void) {
-  ssize_t writtenSize = 0;
-  while(writtenSize > -1 && writtenSize < strlen("\033[H\033[0J\033[3J")) {
-    writtenSize += write(STDOUT_FILENO, "\033[H\033[0J\033[3J"+writtenSize, strlen("\033[H\033[0J\033[3J")-writtenSize);
+#include "common.h"
+
+void renderStatus(uint8_t type, struct winsize *winSize) {
+  static uint32_t numberOfMessagesSent = 0;
+  static uint32_t numberOfMessagesConfirmationsReceived = 0;
+  static uint32_t numberOfMessagesReceived = 0;
+
+  switch (type) {
+    case MESSAGE_SENT:
+      numberOfMessagesSent++;
+      break;
+    case MESSAGE_CONFIRMATION_RECEIVED:
+      numberOfMessagesConfirmationsReceived++;
+      break;
+    case MESSAGE_RECEIVED:
+      numberOfMessagesReceived++;
+      break;
   }
+
+  printf("\033[%i;0H\033[44m%d/%d | %d\033[0m", winSize->ws_row, numberOfMessagesConfirmationsReceived, numberOfMessagesSent, numberOfMessagesReceived);
+  fflush(stdout);
 }

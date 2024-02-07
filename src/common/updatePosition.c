@@ -26,11 +26,7 @@
 #include "common.h"
 
 int8_t updatePostion(AllMessages *allMessages, char jOrK) {
-  static struct winsize winSize;
-  memset(&winSize, 0, sizeof(struct winsize));
-  ioctl(STDIN_FILENO, TIOCGWINSZ, &winSize);
-
-  uint32_t remainingRowSpace = winSize.ws_col;
+  uint32_t remainingRowSpace = allMessages->winSize.ws_col;
   uint16_t wordSize = 0;
   Message *currentMessage = allMessages->currentStartingMessage;
   uint32_t readSize;
@@ -56,7 +52,7 @@ int8_t updatePostion(AllMessages *allMessages, char jOrK) {
         }
       }
 
-      if(wordSize <= winSize.ws_col){
+      if(wordSize <= allMessages->winSize.ws_col){
         allMessages->currentStartingMessageCharPosition = readSize;
       } else {
         allMessages->currentStartingMessageCharPosition = readSize + remainingRowSpace;
@@ -79,14 +75,14 @@ int8_t updatePostion(AllMessages *allMessages, char jOrK) {
           readSize += wordSize;
         } else {
           previousLineStartingPosition = currentLineStartingPosition;
-          if(wordSize <= winSize.ws_col) {
+          if(wordSize <= allMessages->winSize.ws_col) {
             currentLineStartingPosition = readSize;
             readSize += wordSize;
-            remainingRowSpace = winSize.ws_col - wordSize;
+            remainingRowSpace = allMessages->winSize.ws_col - wordSize;
           } else {
             currentLineStartingPosition = readSize + remainingRowSpace;
             readSize += remainingRowSpace;
-            remainingRowSpace = winSize.ws_col;
+            remainingRowSpace = allMessages->winSize.ws_col;
           }
         }
       }

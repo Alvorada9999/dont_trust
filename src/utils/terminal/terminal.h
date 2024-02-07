@@ -24,9 +24,10 @@
 #define ESCAPE 27
 
 #include <termios.h>
+#include <sys/ioctl.h>
 
 int setCbreak(int fd, struct termios *prevTermios);
-void clearTerminal(void);
+void clearMessages(struct winsize *winSize);
 void printNow(char *string);
 
 #endif
