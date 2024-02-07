@@ -107,8 +107,7 @@ int8_t renderMessages(AllMessages *allMessages) {
   if(allMessages->currentStartingMessage == NULL) return 0;
   struct winsize winSize = allMessages->winSize;
   // the last two rows are used to show some info and the text that is currently being typed
-  // the value at the right side of the equation won't be negative so no problem between different signedness, don't bother :)
-  u_int32_t amountOfCharsThatCanBeShow = (winSize.ws_row - 2) * winSize.ws_col;
+  u_int32_t amountOfCharsThatCanBeShow = ((uint32_t)winSize.ws_row - 2) * (uint32_t)winSize.ws_col;
   if(winSize.ws_row < 3) return 0;
   if(amountOfCharsThatCanBeShow > DEFAULT_MESSAGE_OUTPUT_SIZE) errExit(4);
   //let's compromise to use this many memory since malloc is not async-signal-safe
@@ -203,7 +202,7 @@ int8_t renderMessages(AllMessages *allMessages) {
   static ssize_t writtenSize = 0;
   static ssize_t result = 0;
   while(result > -1 && writtenSize < maxWritingSize) {
-    result = write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize-writtenSize);
+    result = write(STDOUT_FILENO, textToOutput+writtenSize, maxWritingSize-(uint64_t)writtenSize);
     writtenSize += result;
   }
   writtenSize = 0;

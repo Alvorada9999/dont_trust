@@ -17,7 +17,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -65,7 +64,7 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
 
     char gretting[3] = {5, 1, 0};
     while (writtenSize>-1 && writtenSize < 3) {
-      writtenSize += write(socketFd, gretting + writtenSize, 3-writtenSize);
+      writtenSize += write(socketFd, gretting + writtenSize, 3-(uint32_t)writtenSize);
     }
 
     while (readSize < 2) {
@@ -77,7 +76,7 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
     readSize = 0;
 
     while (writtenSize>-1 && writtenSize < 7 + 62) {
-      writtenSize += write(socketFd, connectionRequest + writtenSize, (7 + 62)-writtenSize);
+      writtenSize += write(socketFd, connectionRequest + writtenSize, (7 + 62)-(uint32_t)writtenSize);
     }
 
     memset(response, 0, 6);

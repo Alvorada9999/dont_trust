@@ -27,7 +27,7 @@ uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue) {
       queue->size = 0;
     } else {
       queue->firstElement = queue->firstElement->next;
-      queue->size = queue->size--;
+      queue->size--;
     }
     free(queue->firstElement);
     return messageCodeInNetworkByteOrder;
