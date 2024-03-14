@@ -2,5 +2,5 @@
 -Wall
 -Wextra
 -Wsign-conversion
--Werror
 -Ibuild
+-std=gnu17
