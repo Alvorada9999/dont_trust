@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <unistd.h>
 #include <signal.h>
@@ -30,10 +31,14 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
   static uint8_t readingStatus = READING_NOTHING;
 
   lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE);
+  printf("\n\n------ CALL TO read(), returned value: %d\n\n", lastReadSize);
+  fflush(stdout);
   if(lastReadSize == 0) errExit(16);
   while (lastReadSize != -1) {
 
     for (int32_t i=0; i<lastReadSize; i++) {
+      printf("Iteration: %i | Decimal = %d | Char = %c\n", i, buffer[i], buffer[i]);
+      fflush(stdout);
       switch (readingStatus) {
         case READING_NOTHING:
           switch (buffer[i]) {
@@ -95,11 +100,12 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
           //add message to allMessages
           addNewMessage(allMessages, message, messageSize, MESSAGE_FROM_PEER);
           if(allMessages->isThereSpaceLeftOnScreenForMoreMessages) {
-            raise(SIGWINCH);
+            // raise(SIGWINCH);
           }
           //add message code to be sent back as confirmation
           enqueueMessageCode(messageCodesToBeSentBackAsConfirmationQueue, messageCodeInNetworkByteOrder);
 
+          printf("\nReceived Message:\n%s\nSize:%u\n\n", message, messageReadSize);
           //if it arrived here, the message was read entirely
           //being the case, let's reset values
           numberOfReadBytesFromMessageCode = 0;
@@ -108,7 +114,7 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
           messageReadSize = 0;
           readingStatus = READING_NOTHING;
 
-          renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
+          // renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
 
           break;
         }
@@ -171,10 +177,10 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
           readingStatus = READING_NOTHING;
 
           if(isAnyOfTheMessagesFromCodesOnScreen) {
-            raise(SIGWINCH);
+            // raise(SIGWINCH);
           }
 
-          renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
+          // renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
 
           break;
         }
@@ -182,6 +188,8 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
     }
 
     lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE);
+    printf("\n\n------ CALL TO read(), returned value: %d\n\n", lastReadSize);
+    fflush(stdout);
   }
   allMessages->socketInputStatus.isInputAvailable = false;
 }
