@@ -62,6 +62,11 @@ void resetTerminal(void) {
   tcsetattr(STDIN_FILENO, TCSANOW, &oldTerminalConfigurations);
 }
 
+int8_t peerConnectedSocket = 0;
+void closeConnection(void) {
+  shutdown(peerConnectedSocket, SHUT_RDWR);
+}
+
 int main(int argc, char *argv[]) {
   Configs configs;
   memset(&configs, 0, sizeof(Configs));
@@ -69,7 +74,6 @@ int main(int argc, char *argv[]) {
 
   getConfigs(argc, argv, &configs);
 
-  int8_t peerConnectedSocket = 0;
   if(configs.shouldActAsServer) {
     printNow("Waiting connection\n");
     peerConnectedSocket = startServer();
@@ -98,6 +102,7 @@ int main(int argc, char *argv[]) {
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
   setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
   atexit(&resetTerminal);
+  atexit(&closeConnection);
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
