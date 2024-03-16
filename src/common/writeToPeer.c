@@ -57,7 +57,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
       }
 
       static uint8_t writtenSize = 0;
-      static int8_t lastWriteSize = 0;
+      static int32_t lastWriteSize = 0;
       do {
         lastWriteSize = write(*fd, dataToBeSent+writtenSize, 9-writtenSize);
         if(lastWriteSize != -1) writtenSize += lastWriteSize;
@@ -96,7 +96,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
         memcpy(firstSegmentBuffer+5, &messageSizeInNetworkByteOrder, 2);
       }
 
-      static int8_t lastWriteSize = 0;
+      static int32_t lastWriteSize = 0;
 
       static uint8_t firstSegmentWrittenSize = 0;
       if(firstSegmentWrittenSize < 7) {
