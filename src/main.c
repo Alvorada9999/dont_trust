@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -64,7 +65,7 @@ void resetTerminal(void) {
 
 int8_t peerConnectedSocket = 0;
 void closeConnection(void) {
-  shutdown(peerConnectedSocket, SHUT_RDWR);
+  // shutdown(peerConnectedSocket, SHUT_RDWR);
 }
 
 int main(int argc, char *argv[]) {

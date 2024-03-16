@@ -190,6 +190,17 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
     lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE);
     printf("\n\n------ CALL TO read(), returned value: %d\n\n", lastReadSize);
     fflush(stdout);
+
+    // printf("\n\n");
+    // fflush(stdout);
+
+    // for(int32_t i=0; i<MAX_MESSAGE_SIZE; i++) {
+    //   printf("%c", buffer[i]);
+    //   fflush(stdout);
+    // }
+    // printf("\n\n");
+
+    // fflush(stdout);
   }
   allMessages->socketInputStatus.isInputAvailable = false;
 }

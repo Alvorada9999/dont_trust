@@ -15,8 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <errno.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -25,6 +27,8 @@
 
 void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd) {
   static uint8_t writingStatus = WRITING_NOTHING;
+  static ssize_t totalWrittenSize = 0;
+
   if(writingStatus == WRITING_NOTHING) {
     if(messageCodesToBeSentBackAsConfirmationQueue->size > 0) {
       writingStatus = WRITING_MESSAGES_CONFIRMATIONS;
@@ -57,9 +61,10 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
       }
 
       static uint8_t writtenSize = 0;
-      static int8_t lastWriteSize = 0;
+      static int32_t lastWriteSize = 0;
       do {
         lastWriteSize = write(*fd, dataToBeSent+writtenSize, 9-writtenSize);
+        totalWrittenSize += lastWriteSize;
         if(lastWriteSize != -1) writtenSize += lastWriteSize;
       } while (lastWriteSize != -1 && writtenSize < 9);
 
@@ -96,12 +101,13 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
         memcpy(firstSegmentBuffer+5, &messageSizeInNetworkByteOrder, 2);
       }
 
-      static int8_t lastWriteSize = 0;
+      static int32_t lastWriteSize = 0;
 
       static uint8_t firstSegmentWrittenSize = 0;
       if(firstSegmentWrittenSize < 7) {
         do {
           lastWriteSize = write(*fd, firstSegmentBuffer+firstSegmentWrittenSize, 7-firstSegmentWrittenSize);
+          totalWrittenSize += lastWriteSize;
           if(lastWriteSize != -1) firstSegmentWrittenSize += lastWriteSize;
         } while (lastWriteSize != -1 && firstSegmentWrittenSize < 7);
         if(lastWriteSize == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -114,6 +120,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
       if(messageWrittenSize < messageToBeSent->size) {
         do {
           lastWriteSize = write(*fd, messageToBeSent->string+messageWrittenSize, messageToBeSent->size-messageWrittenSize);
+          totalWrittenSize += lastWriteSize;
           if(lastWriteSize != -1) messageWrittenSize += lastWriteSize;
         } while (lastWriteSize != -1 && messageWrittenSize < messageToBeSent->size);
         if(lastWriteSize == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -132,10 +139,13 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
 
       allMessages->messagesByCode.numberOfSentMessages += 1;
 
-      renderStatus(MESSAGE_SENT, &allMessages->winSize);
+      // renderStatus(MESSAGE_SENT, &allMessages->winSize);
 
       break;
     }
 
   }
+  printf("\n\nTotal written size: %zd\n\n", totalWrittenSize);
+  fflush(stdout);
+  // sleep(5);
 }

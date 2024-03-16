@@ -18,7 +18,7 @@
 #define DTNET
 #include <stdint.h>
 
-#define DEFAULT_SERVER_PORT 8000
+#define DEFAULT_SERVER_PORT 9000
 #define DEFAULT_TOR_PROXY_PORT 9050
 
 int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
