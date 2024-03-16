@@ -3,21 +3,6 @@
 
 Secure peer to peer communication, opsec focused
 
-### Motivation
-
-- The need for information confidentiality
-- Guarantee that the software does only what is intended
-- No time to manually check the code of big open source projects
-- No need for large communication protocols
-
-### Philosophy/Goals
-
-- Small codebase, easy to understand and hack
-- Secure by default
-- Useful as a teaching/learning platform for linux system programming
-- Small number of source files
-- Minimal dependencies
-
 ### Development environment
 compile_flags.txt is for [usage with clangd](https://clangd.llvm.org/design/compile-commands#compilation-databases)
 The c standard being used is a dialect from c17, that being gnu17
@@ -25,19 +10,18 @@ The c standard being used is a dialect from c17, that being gnu17
 ## Building
 ### Dependencies
 - gcc
-- openssl3 development files
-- [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html)
+- openssl3 and it's development files (More precisely, [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html))
+- make (Or run the build command from the Makefile directly)
 
 To build:
 ```bash
 $ make build
 ```
-To run:
-```bash
-$ ./build/dont_trust ...
-```
-
 ## Usage
+### Dependencies
+- An [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) conformant terminal with E3 capability (Most of the terminals nowadays, you probably should not need to worry about it if you aren't using some exotic setup)
+- Tor, [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it)
+- [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html)
 
 ##### You must provide your rsa private key and the rsa public key from your peer (⚠️Not yet implemented):
 ```bash
