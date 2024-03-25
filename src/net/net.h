@@ -21,6 +21,10 @@
 #define DEFAULT_SERVER_PORT 8000
 #define DEFAULT_TOR_PROXY_PORT 9050
 
+#define TCP_STREAM_COMMAND_INFO_LENGTH 1
+#define TCP_STREAM_MESSAGE_CODE_INFO_LENGTH 32
+#define TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH 32
+
 int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
 int8_t startServer(void);
 int8_t simpleConnect(char *addr);

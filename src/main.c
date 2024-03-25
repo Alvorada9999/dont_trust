@@ -106,10 +106,10 @@ int main(int argc, char *argv[]) {
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
-      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket);
+      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey);
     }
     if(allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
-      writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket);
+      writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pubKey);
     }
     processInput(&allMessages);
   }

@@ -47,9 +47,27 @@ void errExit(uint16_t errCode) {
   errors[20] = "Error when trying to listen on port\n";
   errors[21] = "Error when trying to accept connection\n";
   errors[22] = "Error when trying to establishing connection\n";
-  errors[23] = "Peer sent invalid message size\n";
-  errors[24] = "Peer sent invalid message value\n";
+
+  //not being used
+  errors[23] = "";
+  errors[24] = "";
+
   errors[25] = "Peer sent invalid message confirmation code\n";
+
+  errors[26] = "Failed to read private key file\n";
+  errors[27] = "Failed to read pem encoded private key\n";
+  errors[28] = "Failed to read public key file\n";
+  errors[29] = "Failed to read pem encoded public key\n";
+
+  errors[30] = "Failed to initialize context for decryption";
+  errors[31] = "Failed to initialize the decryption operation";
+  errors[32] = "Failed to perform the decryption operation";
+  errors[33] = "Failed to finalize the decryption operation";
+
+  errors[34] = "Failed to initialize context for encryption";
+  errors[35] = "Failed to initialize the encryption operation";
+  errors[36] = "Failed to perform the encryption operation";
+  errors[37] = "Failed to finalize the encryption operation";
 
   printf("%s", errors[errCode]);
   fflush(stdout);

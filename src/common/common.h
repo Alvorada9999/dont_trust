@@ -23,10 +23,17 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
+#include <openssl/types.h>
+
 #define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
+//if it's changed, MAX_CIPHER_TEXT_LENGTH should be too
+//new MAX_CIPHER_TEXT_LENGTH = (MAX_MESSAGE_SIZE+16)/16)*16
 #define MAX_MESSAGE_SIZE 65535
 #define DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY 1000
 #define DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW 1000
+
+#define TCP_STREAM_COMMAND_INFO_LENGTH 1
+#define TCP_STREAM_MESSAGE_CODE_INFO_LENGTH 32
 
 enum MessageStatus {
   PEER_NOT_READ = 1,
@@ -119,6 +126,9 @@ typedef struct {
   SocketInputStatus socketInputStatus;
 
   struct winsize winSize;
+
+  EVP_PKEY *pKey;
+  EVP_PKEY *pubKey;
 } AllMessages;
 
 void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner);
@@ -149,8 +159,8 @@ uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue);
 bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
 
 void processInput(AllMessages *allMessages);
-void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd);
+void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey);
+void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey);
 
 void renderStatus(uint8_t type, struct winsize *winSize);
 

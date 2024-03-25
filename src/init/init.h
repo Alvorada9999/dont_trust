@@ -22,15 +22,22 @@
 
 #include "common.h"
 
+#include <openssl/evp.h>
+
 #define ONION_ADDR 0
 #define IPV4_ADDR 1
+
+#define PKEY_PATH_OPTION 'a'
+#define PUBKEY_PAPTH_OPTION 'b'
 
 typedef struct {
   char *ipV4;
   char *onionAddress;
-  //is true when the any of the above is not given
+  //is true when any of the above is not given
   bool shouldActAsServer;
   int8_t chosenOption;
+  EVP_PKEY *pKey;
+  EVP_PKEY *pubKey;
 } Configs;
 
 void getConfigs(int argc, char *argv[], Configs *configsToUpdate);

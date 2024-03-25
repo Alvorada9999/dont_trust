@@ -30,7 +30,7 @@ int8_t startServer(void) {
   memset(&localServerAddr, 0, sizeof(struct sockaddr_in));
   localServerAddr.sin_family = AF_INET;
   localServerAddr.sin_port = htons(DEFAULT_SERVER_PORT);
-  localServerAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  localServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
   if(bind(listeningSocketFd, (struct sockaddr *)&localServerAddr, sizeof(struct sockaddr_in)) == -1) errExit(19);
 

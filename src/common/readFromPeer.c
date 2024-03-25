@@ -23,165 +23,226 @@
 
 #include "common.h"
 #include "error.h"
+#include "net.h"
+#include "dt_crypto.h"
 
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd) {
+#define GETTING_MESSAGE_CODE 0
+#define GETTING_CIPHER_TEXT_SIZE 1
+#define GETTING_INITIALIZATION_VECTOR 2
+#define GETTING_SESSION_KEY 3
+#define GETTING_PLAINTEXT 4
+#define FINALIZING_READING_MESSAGE 5
+
+#define GETTING_NUMBER_OF_MESSAGE_CONFIRMATIONS 6
+#define GETTING_MESSAGE_CONFIRMATION 7
+#define FINALIZING_READING_MESSAGE_CONFIRMATIONS 8
+
+void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey) {
   static char buffer[MAX_MESSAGE_SIZE];
   static int32_t lastReadSize = 0;
-  static uint8_t readingStatus = READING_NOTHING;
+  static int32_t inputLeftToReadSize;
 
-  lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE);
-  if(lastReadSize == 0) errExit(16);
-  while (lastReadSize != -1) {
+  while ((lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE)) != -1) {
+    if(lastReadSize == 0) errExit(16);
+    inputLeftToReadSize = lastReadSize;
 
-    for (int32_t i=0; i<lastReadSize; i++) {
+    while(inputLeftToReadSize >= 0) {
+
+      static uint8_t readingStatus = READING_NOTHING;
       switch (readingStatus) {
-        case READING_NOTHING:
-          switch (buffer[i]) {
+        case READING_NOTHING: {
+          switch (buffer[lastReadSize-inputLeftToReadSize]) {
             case BEGIN_OF_MESSAGE_TRANSMISSION:
               readingStatus = READING_MESSAGES;
+              inputLeftToReadSize--;
               break;
             case BEGIN_OF_MESSAGES_CONFIRMATIONS:
               readingStatus = READING_MESSAGES_CONFIRMATIONS;
+              inputLeftToReadSize--;
               break;
             default:
+              readingStatus = READING_MESSAGES;
+              inputLeftToReadSize--;
+              break;
               errExit(17);
           }
           break;
+        }
         case READING_MESSAGES: {
-          static char messageCodeBuffer[4];
-          static uint8_t numberOfReadBytesFromMessageCode = 0;
-          if(numberOfReadBytesFromMessageCode < 4) {
-            messageCodeBuffer[numberOfReadBytesFromMessageCode] = buffer[i];
-            numberOfReadBytesFromMessageCode++;
-            break;
-          }
-
-          static char messageSizeBuffer[2];
-          static uint8_t numberOfReadBytesFromMessageSize = 0;
-          if(numberOfReadBytesFromMessageSize < 2) {
-            messageSizeBuffer[numberOfReadBytesFromMessageSize] = buffer[i];
-            numberOfReadBytesFromMessageSize++;
-            break;
-          }
-
-          static bool gotMessageSize = false;
-          static uint16_t messageSize = 0;
+          static uint8_t doingNow = GETTING_MESSAGE_CODE;
+          static uint32_t gotSize = 0;
           static uint32_t messageCodeInNetworkByteOrder;
-          if(!gotMessageSize) {
-            gotMessageSize = true;
-            memcpy(&messageSize, messageSizeBuffer, 2);
-            messageSize = ntohs(messageSize);
-            //exiting program here if peer send invalid message size
-            if(messageSize > MAX_MESSAGE_SIZE || messageSize <= 0) {
-              errExit(23);
+          static uint32_t cipherTextSize;
+          static char initializationVector[INITIALIZATION_VECTOR_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+          static char sessionKey[SESSION_KEY_LENGTH];
+          static char cipherText[MAX_CIPHER_TEXT_LENGTH];
+          static char plainText[MAX_MESSAGE_SIZE];
+          static uint16_t messageSize = 0;
+
+          switch (doingNow) {
+            // ---
+            case GETTING_MESSAGE_CODE: {
+              static char messageCodeInNetworkByteOrderBuffer[TCP_STREAM_MESSAGE_CODE_INFO_LENGTH/8];
+              if(gotSize < TCP_STREAM_MESSAGE_CODE_INFO_LENGTH/8) {
+                messageCodeInNetworkByteOrderBuffer[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                memcpy(&messageCodeInNetworkByteOrder, messageCodeInNetworkByteOrderBuffer, TCP_STREAM_MESSAGE_CODE_INFO_LENGTH/8);
+                doingNow = GETTING_CIPHER_TEXT_SIZE;
+                gotSize = 0;
+                break;
+              }
             }
-            memcpy(&messageCodeInNetworkByteOrder, messageCodeBuffer, 4);
-          }
-
-          //handle this
-          static char message[MAX_MESSAGE_SIZE];
-          static uint16_t messageReadSize = 0;
-          if(messageReadSize < messageSize) {
-            if(buffer[i] > 31 && buffer[i] < 127) {
-              message[messageReadSize] = buffer[i];
-            } else {
-              errExit(24);
+            case GETTING_CIPHER_TEXT_SIZE: {
+              static char cipherTextSizeBuffer[TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH/8];
+              if(gotSize < TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH/8) {
+                cipherTextSizeBuffer[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                memcpy(&cipherTextSize, cipherTextSizeBuffer, TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH/8);
+                cipherTextSize = ntohl(cipherTextSize);
+                doingNow = GETTING_INITIALIZATION_VECTOR;
+                gotSize = 0;
+                break;
+              }
             }
-            messageReadSize++;
+            case GETTING_INITIALIZATION_VECTOR: {
+              if(gotSize < INITIALIZATION_VECTOR_LENGTH) {
+                initializationVector[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                gotSize = 0;
+                doingNow = GETTING_SESSION_KEY;
+                break;
+              }
+            }
+            case GETTING_SESSION_KEY: {
+              if(gotSize < SESSION_KEY_LENGTH) {
+                sessionKey[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                gotSize = 0;
+                doingNow = GETTING_PLAINTEXT;
+                break;
+              }
+            }
+            case GETTING_PLAINTEXT: {
+              if(gotSize < cipherTextSize) {
+                cipherText[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                gotSize = 0;
+                messageSize = (uint16_t)envelopeOpen(pKey, (unsigned char *)cipherText, (int32_t)cipherTextSize, (unsigned char *)sessionKey, (unsigned char *)initializationVector, (unsigned char *)plainText);
+                doingNow = FINALIZING_READING_MESSAGE;
+                break;
+              }
+            }
+            case FINALIZING_READING_MESSAGE: {
+              //add message to allMessages
+              addNewMessage(allMessages, plainText, messageSize, MESSAGE_FROM_PEER);
+              if(allMessages->isThereSpaceLeftOnScreenForMoreMessages) {
+                raise(SIGWINCH);
+              }
+              //add message code to be sent back as confirmation
+              enqueueMessageCode(messageCodesToBeSentBackAsConfirmationQueue, messageCodeInNetworkByteOrder);
+              renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
+
+              //if it arrived here, all messages confirmation codes were received
+              //being the case, let's reset values
+              doingNow = GETTING_MESSAGE_CODE;
+              readingStatus = READING_NOTHING;
+
+              //to leave "doingNow" loop
+              inputLeftToReadSize = -1;
+            }
+            // ---
           }
-
-          if(messageReadSize < messageSize) break;
-
-          //add message to allMessages
-          addNewMessage(allMessages, message, messageSize, MESSAGE_FROM_PEER);
-          if(allMessages->isThereSpaceLeftOnScreenForMoreMessages) {
-            raise(SIGWINCH);
-          }
-          //add message code to be sent back as confirmation
-          enqueueMessageCode(messageCodesToBeSentBackAsConfirmationQueue, messageCodeInNetworkByteOrder);
-
-          //if it arrived here, the message was read entirely
-          //being the case, let's reset values
-          numberOfReadBytesFromMessageCode = 0;
-          numberOfReadBytesFromMessageSize = 0;
-          gotMessageSize = false;
-          messageReadSize = 0;
-          readingStatus = READING_NOTHING;
-
-          renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
 
           break;
         }
         case READING_MESSAGES_CONFIRMATIONS: {
+          static uint8_t doingNow = GETTING_NUMBER_OF_MESSAGE_CONFIRMATIONS;
+          static uint32_t gotSize = 0;
+          static uint32_t numberOfGotMessageConfirmationCodes = 0;
+          static uint32_t numberOfMessageConfirmations = 0;
+          static uint32_t messageConfirmationCode = 0;
           static bool isAnyOfTheMessagesFromCodesOnScreen = false;
 
-          static char numberOfConfirmationCodesBuffer[4];
-          static uint8_t numberOfReadBytesNumberOfConfirmationCodes = 0;
-          if(numberOfReadBytesNumberOfConfirmationCodes < 4) {
-            numberOfConfirmationCodesBuffer[numberOfReadBytesNumberOfConfirmationCodes] = buffer[i];
-            numberOfReadBytesNumberOfConfirmationCodes++;
-            if(numberOfReadBytesNumberOfConfirmationCodes < 4) break;
-          }
-
-          static uint32_t numberOfConfirmationCodes = 0;
-          static bool gotNumberOfConfirmationCodes = false;
-          if(!gotNumberOfConfirmationCodes) {
-            gotNumberOfConfirmationCodes = true;
-            memcpy(&numberOfConfirmationCodes, numberOfConfirmationCodesBuffer, 4);
-            numberOfConfirmationCodes = ntohl(numberOfConfirmationCodes);
-            break;
-          }
-
-          static uint32_t receivedNumberOfConfirmationsCodes = 0;
-          static uint32_t numberOfReadBytesFromMessageConfirmationCodes = 0;
-          static char messageConfirmationCodeBuffer[4];
-          if(receivedNumberOfConfirmationsCodes < numberOfConfirmationCodes) {
-            if(numberOfReadBytesFromMessageConfirmationCodes < 4) {
-              messageConfirmationCodeBuffer[numberOfReadBytesFromMessageConfirmationCodes] = buffer[i];
-              numberOfReadBytesFromMessageConfirmationCodes++;
-              if(numberOfReadBytesFromMessageConfirmationCodes < 4) {
+          switch (doingNow) {
+            // ---
+            case GETTING_NUMBER_OF_MESSAGE_CONFIRMATIONS: {
+              static char numberOfMessageConfirmationsBuffer[sizeof(uint32_t)];
+              if(gotSize < sizeof(uint32_t)) {
+                numberOfMessageConfirmationsBuffer[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
                 break;
               } else {
-                receivedNumberOfConfirmationsCodes++;
-
-                static uint32_t messageConfirmationCode = 0;
-                memcpy(&messageConfirmationCode, messageConfirmationCodeBuffer, 4);
+                memcpy(&numberOfMessageConfirmations, numberOfMessageConfirmationsBuffer, sizeof(uint32_t));
+                numberOfMessageConfirmations = htonl(numberOfMessageConfirmations);
+                doingNow = GETTING_MESSAGE_CONFIRMATION;
+                gotSize = 0;
+                break;
+              }
+            }
+            case GETTING_MESSAGE_CONFIRMATION: {
+              static char messageConfirmationBuffer[sizeof(uint32_t)];
+              if(gotSize < sizeof(uint32_t)) {
+                messageConfirmationBuffer[gotSize] = buffer[lastReadSize-inputLeftToReadSize];
+                inputLeftToReadSize--;
+                gotSize++;
+                break;
+              } else {
+                numberOfGotMessageConfirmationCodes++;
+                memcpy(&messageConfirmationCode, messageConfirmationBuffer, sizeof(uint32_t));
                 messageConfirmationCode = ntohl(messageConfirmationCode);
+
                 if(messageConfirmationCode < 0 || messageConfirmationCode > allMessages->messagesByCode.length) errExit(25);
                 updateSentMessageStatusAsPeerReadByMessageCode(allMessages, messageConfirmationCode);
                 if(isMessageOnScreen(allMessages, messageConfirmationCode)) {
                   isAnyOfTheMessagesFromCodesOnScreen = true;
                 }
 
-                //if there is more codes to get, go to the next
-                if(receivedNumberOfConfirmationsCodes < numberOfConfirmationCodes) {
-                  numberOfReadBytesFromMessageConfirmationCodes = 0;
-                  break;
+                if(numberOfGotMessageConfirmationCodes == numberOfMessageConfirmations) {
+                  doingNow = FINALIZING_READING_MESSAGE_CONFIRMATIONS;
                 }
+                gotSize = 0;
+                break;
               }
             }
+            case FINALIZING_READING_MESSAGE_CONFIRMATIONS: {
+              if(isAnyOfTheMessagesFromCodesOnScreen) {
+                raise(SIGWINCH);
+              }
+
+              //if it arrived here, all messages confirmation codes were received
+              //being the case, let's reset values
+              numberOfGotMessageConfirmationCodes = 0;
+              isAnyOfTheMessagesFromCodesOnScreen = false;
+              doingNow = GETTING_NUMBER_OF_MESSAGE_CONFIRMATIONS;
+              readingStatus = READING_NOTHING;
+
+              //to leave "doingNow" loop
+              inputLeftToReadSize = -1;
+            }
+            // ---
           }
-
-          //if it arrived here, all messages confirmation codes were received
-          //being the case, let's reset values
-          numberOfReadBytesNumberOfConfirmationCodes = 0;
-          gotNumberOfConfirmationCodes = false;
-          receivedNumberOfConfirmationsCodes = 0;
-          numberOfReadBytesFromMessageConfirmationCodes = 0;
-          readingStatus = READING_NOTHING;
-
-          if(isAnyOfTheMessagesFromCodesOnScreen) {
-            raise(SIGWINCH);
-          }
-
-          renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
 
           break;
         }
       }
     }
 
-    lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE);
   }
   allMessages->socketInputStatus.isInputAvailable = false;
 }
