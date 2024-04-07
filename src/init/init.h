@@ -19,16 +19,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <signal.h>
-
-#include "common.h"
-
 #include <openssl/evp.h>
 
 #define ONION_ADDR 0
 #define IPV4_ADDR 1
 
 #define PKEY_PATH_OPTION 'a'
-#define PUBKEY_PAPTH_OPTION 'b'
+#define PUBKEY_PATH_OPTION 'b'
+#define TORCONTROLPASSWORD_PATH_OPTION 'c'
 
 typedef struct {
   char *ipV4;
@@ -38,7 +36,11 @@ typedef struct {
   int8_t chosenOption;
   EVP_PKEY *pKey;
   EVP_PKEY *pubKey;
+  char *torControlPassword;
+  int32_t torControlPasswordLength;
 } Configs;
+
+#include "common.h"
 
 void getConfigs(int argc, char *argv[], Configs *configsToUpdate);
 void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_t *, void *));

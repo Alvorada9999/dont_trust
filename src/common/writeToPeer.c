@@ -24,7 +24,6 @@
 #include "common.h"
 #include "dt_crypto.h"
 #include "net.h"
-#include "terminal.h"
 
 void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey) {
 

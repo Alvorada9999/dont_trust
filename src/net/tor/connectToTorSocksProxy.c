@@ -1,5 +1,5 @@
 // This file is part of dont_trust.
-// Copyright (C) 2023 Kenedy Henrique Bueno Silva
+// Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
 // dont_trust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #include "error.h"
-#include "net.h"
+#include "tor.h"
 
 int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
   if (strlen(onionAddr) != 62) errExit(5);

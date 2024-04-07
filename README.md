@@ -1,4 +1,3 @@
-#### 🚧 Work in progress 🚧
 # dont_trust
 
 Secure peer to peer communication, opsec focused
@@ -47,8 +46,27 @@ $ dont_trust -o vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion
 $ dont_trust ...
 ```
 ###### Just dont use any connection option, that being "-t" and "-o"
-##### To listen for onion ones (⚠️Not yet implemented):
-TODO
+##### To listen for onion ones:
+Before that, do this first time setup:<br>
+1 - Generate a hashed password for control port access, <your_password> length must not be bigger than 1000:
+```bash
+$ tor --hash-password <your_password>
+```
+2 - On your ["torrc" file](https://support.torproject.org/tbb/tbb-editing-torrc/), add the following:
+```bash
+ControlPort 9051
+HashedControlPassword <The result from the above command>
+```
+3 - Reload the configs if tor is running:
+```bash
+$ sudo kill -s SIGHUP <tor process id>
+```
+<br>
+
+Just provide your password
+```bash
+$ dont_trust --torControlPassword <your_password>
+```
 
 ## Protocol Specification
 

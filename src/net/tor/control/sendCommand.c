@@ -1,5 +1,5 @@
 // This file is part of dont_trust.
-// Copyright (C) 2023 Kenedy Henrique Bueno Silva
+// Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
 // dont_trust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
 #include <stdint.h>
+#include <unistd.h>
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_SERVER_PORT 80
+#include "error.h"
 
-#define TCP_STREAM_COMMAND_INFO_LENGTH 1
-#define TCP_STREAM_MESSAGE_CODE_INFO_LENGTH 32
-#define TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH 32
-
-int8_t startServer(void);
-int8_t simpleConnect(char *addr);
-
-#endif // !DTNET
+void sendCommand(int32_t socketFd, char *command, int32_t commandSize) {
+  int32_t lastWriteSize = 0;
+  int32_t totalWrittenSize = 0;
+  while(totalWrittenSize < commandSize) {
+    lastWriteSize = write(socketFd, command+totalWrittenSize, (uint32_t)(commandSize - totalWrittenSize));
+    if(lastWriteSize == -1) {
+      errExit(23);
+    }
+    totalWrittenSize += lastWriteSize;
+  }
+}

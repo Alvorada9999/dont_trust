@@ -1,5 +1,5 @@
 // This file is part of dont_trust.
-// Copyright (C) 2023 Kenedy Henrique Bueno Silva
+// Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
 // dont_trust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,18 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTNET
-#define DTNET
 #include <stdint.h>
+#include <stdbool.h>
 
-#define DEFAULT_SERVER_PORT 8000
-#define DEFAULT_TOR_SERVER_PORT 80
-
-#define TCP_STREAM_COMMAND_INFO_LENGTH 1
-#define TCP_STREAM_MESSAGE_CODE_INFO_LENGTH 32
-#define TCP_STREAM_CIPHER_TEXT_SIZE_INFO_LENGTH 32
-
-int8_t startServer(void);
-int8_t simpleConnect(char *addr);
-
-#endif // !DTNET
+// backslashes and double quotes only
+int32_t scapePassword(char *password, int32_t passwordLength, char buffer[2000]) {
+  int32_t currentBufferPosition = 0;
+  for(int32_t i=0; i<passwordLength; i++) {
+    if(password[i] == '\\' || password[i] == '"') {
+      buffer[currentBufferPosition] = '\\';
+      buffer[currentBufferPosition+1] = password[i];
+      currentBufferPosition += 2;
+    } else {
+      buffer[currentBufferPosition] = password[i];
+      currentBufferPosition++;
+    }
+  }
+  return currentBufferPosition;
+}

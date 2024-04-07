@@ -21,7 +21,7 @@
 #include "error.h"
 
 void errExit(uint16_t errCode) {
-  char *errors[40];
+  char *errors[60];
   errors[1] = "Error when blocking all signals\n";
   errors[2] = "Error unblocking int and winch signals\n";
   errors[3] = "Error setting terminal in break state\n";
@@ -48,10 +48,6 @@ void errExit(uint16_t errCode) {
   errors[21] = "Error when trying to accept connection\n";
   errors[22] = "Error when trying to establishing connection\n";
 
-  //not being used
-  errors[23] = "";
-  errors[24] = "";
-
   errors[25] = "Peer sent invalid message confirmation code\n";
 
   errors[26] = "Failed to read private key file\n";
@@ -68,6 +64,14 @@ void errExit(uint16_t errCode) {
   errors[35] = "Failed to initialize the encryption operation";
   errors[36] = "Failed to perform the encryption operation";
   errors[37] = "Failed to finalize the encryption operation";
+
+  errors[23] = "Error when sending command to tor\n";
+  errors[24] = "Error when receiving reply from tor\n";
+  errors[38] = "Error when trying to connect to tor\n";
+  errors[39] = "PROTOCOLINFO command responded with an error code\n";
+  errors[41] = "PROTOCOLINFO command responded with an unsupported PIPEVERSION\n";
+  errors[40] = "AUTHENTICATE command responded with an error code\n";
+  errors[42] = "ADD_ONION command responded with an error code\n";
 
   printf("%s", errors[errCode]);
   fflush(stdout);

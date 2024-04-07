@@ -37,18 +37,29 @@
 #define GETTING_MESSAGE_CONFIRMATION 7
 #define FINALIZING_READING_MESSAGE_CONFIRMATIONS 8
 
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey) {
+void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey, Configs *configs) {
   static char buffer[MAX_MESSAGE_SIZE];
   static int32_t lastReadSize = 0;
   static int32_t inputLeftToReadSize;
+  static bool gotFirst4BytesSinceTheTorConnectionEstablishment = false;
 
   while ((lastReadSize = read(*fd, buffer, MAX_MESSAGE_SIZE)) != -1) {
     if(lastReadSize == 0) errExit(16);
     inputLeftToReadSize = lastReadSize;
+    static uint8_t readingStatus = READING_NOTHING;
+
+    ///TOR ONLY HACK ----------
+    //That's really a hack, the listening hidden service, by some reason, send 4 bytes
+    //together the first bytes the application send normally, I need to read some specs to make
+    //sure that is not really some unexpected behavior coming from tor
+    if(!configs->shouldActAsServer && configs->chosenOption == ONION_ADDR && !gotFirst4BytesSinceTheTorConnectionEstablishment && readingStatus == READING_NOTHING) {
+      inputLeftToReadSize -= 4;
+      gotFirst4BytesSinceTheTorConnectionEstablishment = true;
+    }
+    ///TOR ONLY HACK ----------
 
     while(inputLeftToReadSize >= 0) {
 
-      static uint8_t readingStatus = READING_NOTHING;
       switch (readingStatus) {
         case READING_NOTHING: {
           switch (buffer[lastReadSize-inputLeftToReadSize]) {
@@ -61,9 +72,6 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
               inputLeftToReadSize--;
               break;
             default:
-              readingStatus = READING_MESSAGES;
-              inputLeftToReadSize--;
-              break;
               errExit(17);
           }
           break;

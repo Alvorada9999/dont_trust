@@ -43,7 +43,7 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
   commandLineOptions -> pKey = NULL;
   commandLineOptions -> pubKey = NULL;
 
-  struct option longopts[3];
+  struct option longopts[4];
   longopts[0].name = "pKey";
   longopts[0].has_arg = required_argument;
   longopts[0].flag = NULL;
@@ -51,11 +51,15 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
   longopts[1].name = "pubKey";
   longopts[1].has_arg = required_argument;
   longopts[1].flag = NULL;
-  longopts[1].val = PUBKEY_PAPTH_OPTION;
-  longopts[2].name = NULL;
-  longopts[2].has_arg = 0;
+  longopts[1].val = PUBKEY_PATH_OPTION;
+  longopts[2].name = "torControlPassword";
+  longopts[2].has_arg = required_argument;
   longopts[2].flag = NULL;
-  longopts[2].val = 0;
+  longopts[2].val = TORCONTROLPASSWORD_PATH_OPTION;
+  longopts[3].name = NULL;
+  longopts[3].has_arg = 0;
+  longopts[3].flag = NULL;
+  longopts[3].val = 0;
   int32_t longindex;
   int32_t option = 0;
   while((option = getopt_long_only(argc, argv, "ht:o:", longopts, &longindex)) != -1) {
@@ -97,8 +101,16 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
       case PKEY_PATH_OPTION:
         commandLineOptions -> pKey = createPrivateKeyFromFilePath(optarg);
         break;
-      case PUBKEY_PAPTH_OPTION:
+      case PUBKEY_PATH_OPTION:
         commandLineOptions -> pubKey = createPublicKeyFromFilePath(optarg);
+        break;
+      case TORCONTROLPASSWORD_PATH_OPTION:
+        if(strlen(optarg) > 1000) {
+          printf("Invalid onion address\n");
+          exit(EXIT_SUCCESS);
+        }
+        commandLineOptions -> torControlPassword = optarg;
+        commandLineOptions -> torControlPasswordLength = strlen(optarg);
         break;
       case '?':
         exit(EXIT_SUCCESS);

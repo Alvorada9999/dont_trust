@@ -25,6 +25,7 @@
 #include "init.h"
 #include "terminal.h"
 #include "net.h"
+#include "tor.h"
 
 AllMessages allMessages;
 MessageCodesToBeSentBackQueue messageCodesToBeSentBackAsConfirmationQueue = { .firstElement = NULL, .lastElement = NULL, .size = 0 };
@@ -63,8 +64,10 @@ void resetTerminal(void) {
 }
 
 int8_t peerConnectedSocket = 0;
+int8_t torSocketFd = 0;
 void closeConnection(void) {
   shutdown(peerConnectedSocket, SHUT_RDWR);
+  shutdown(torSocketFd, SHUT_RDWR);
 }
 
 int main(int argc, char *argv[]) {
@@ -75,8 +78,12 @@ int main(int argc, char *argv[]) {
   getConfigs(argc, argv, &configs);
 
   if(configs.shouldActAsServer) {
-    printNow("Waiting connection\n");
-    peerConnectedSocket = startServer();
+    if(configs.torControlPassword) {
+      peerConnectedSocket = startTorServer(configs.torControlPassword, configs.torControlPasswordLength, &torSocketFd);
+    } else {
+      printNow("Waiting connection\n");
+      peerConnectedSocket = startServer();
+    }
   } else {
     printNow("Establishing connection\n");
     switch (configs.chosenOption) {
@@ -84,7 +91,7 @@ int main(int argc, char *argv[]) {
         peerConnectedSocket = simpleConnect(configs.ipV4);
         break;
       case ONION_ADDR:
-        peerConnectedSocket = connectToTorSocksProxy(configs.onionAddress, DEFAULT_SERVER_PORT);
+        peerConnectedSocket = connectToTorSocksProxy(configs.onionAddress, DEFAULT_TOR_SERVER_PORT);
         break;
     }
   }
@@ -106,7 +113,7 @@ int main(int argc, char *argv[]) {
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
-      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey);
+      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey, &configs);
     }
     if(allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
       writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pubKey);

@@ -160,7 +160,8 @@ bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
 
 void processInput(AllMessages *allMessages);
 void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey);
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey);
+#include "init.h"
+void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey, Configs *configs);
 
 void renderStatus(uint8_t type, struct winsize *winSize);
 
