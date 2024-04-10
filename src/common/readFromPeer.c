@@ -170,8 +170,10 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
               doingNow = GETTING_MESSAGE_CODE;
               readingStatus = READING_NOTHING;
 
-              //to leave "doingNow" loop
-              inputLeftToReadSize = -1;
+              //to leave "inputLeftToReadSize" loop
+              if(inputLeftToReadSize <= 0) {
+                inputLeftToReadSize = -1;
+              }
             }
             // ---
           }
@@ -225,6 +227,7 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
                   doingNow = FINALIZING_READING_MESSAGE_CONFIRMATIONS;
                 }
                 gotSize = 0;
+                renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
                 break;
               }
             }
@@ -240,8 +243,10 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
               doingNow = GETTING_NUMBER_OF_MESSAGE_CONFIRMATIONS;
               readingStatus = READING_NOTHING;
 
-              //to leave "doingNow" loop
-              inputLeftToReadSize = -1;
+              //to leave "inputLeftToReadSize" loop
+              if(inputLeftToReadSize <= 0) {
+                inputLeftToReadSize = -1;
+              }
             }
             // ---
           }

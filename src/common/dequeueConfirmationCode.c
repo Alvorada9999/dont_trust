@@ -19,17 +19,20 @@
 #include "common.h"
 
 uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue) {
+  static struct MessageCode *elementToFree = NULL;
   if(queue->size > 0) {
     uint32_t messageCodeInNetworkByteOrder = queue->firstElement->codeInNetworkByteOrder;
     if(queue->size == 1) {
+      free(queue->firstElement);
       queue->firstElement = NULL;
       queue->lastElement = NULL;
       queue->size = 0;
     } else {
+      elementToFree = queue->firstElement;
       queue->firstElement = queue->firstElement->next;
+      free(elementToFree);
       queue->size--;
     }
-    free(queue->firstElement);
     return messageCodeInNetworkByteOrder;
   }
   return 0;

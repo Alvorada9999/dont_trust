@@ -97,7 +97,7 @@ typedef struct {
 } SocketInputStatus;
 
 typedef struct {
-  //this field stores only the messages I sent starging from the first one on the 0 index
+  //this field stores only the messages I sent starting from the first one on the 0 index
   Message **array;
   uint32_t availableSpace;
   uint32_t currentSize;
@@ -120,6 +120,7 @@ typedef struct {
   uint32_t messagesBeingShowCode[DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW];
   // -----------------------------------
 
+  //this field stores only the messages I sent
   MessagesByCodeArray messagesByCode;
 
   SocketOutputStatus socketOutputStatus;

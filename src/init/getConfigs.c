@@ -106,7 +106,7 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
         break;
       case TORCONTROLPASSWORD_PATH_OPTION:
         if(strlen(optarg) > 1000) {
-          printf("Invalid onion address\n");
+          printf("Invalid password size\n");
           exit(EXIT_SUCCESS);
         }
         commandLineOptions -> torControlPassword = optarg;
