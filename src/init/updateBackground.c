@@ -21,7 +21,6 @@
 
 void updateBackground(struct winsize *winSize) {
   printf("\033[48;5;%sm\033[H\033[0J", TERMINAL_BACKGROUND_COLOR_ID);
-  fflush(stdout);
   renderStatus(0, winSize);
   printf("\033[H");
   fflush(stdout);
