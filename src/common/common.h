@@ -25,6 +25,17 @@
 
 #include <openssl/types.h>
 
+#define UP_BUTTON 'k'
+#define DOWN_BUTTON 'j'
+#define STATUS_CHANGE_BUTTON 27
+
+//those values are used for handling color customizations on the application
+#define STATUS_LINE_TERMINAL_COLOR_CODE "27"
+#define PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID "196"
+#define PEER_READ_TERMINAL_BACKGROUND_COLOR_ID "41"
+#define RECEIVED_TERMINAL_BACKGROUND_COLOR_ID "232"
+#define TERMINAL_BACKGROUND_COLOR_ID "232"
+
 #define DEFAULT_MESSAGE_OUTPUT_SIZE 140000
 //if it's changed, MAX_CIPHER_TEXT_LENGTH should be too
 //new MAX_CIPHER_TEXT_LENGTH = (MAX_MESSAGE_SIZE+16)/16)*16
@@ -56,7 +67,7 @@ enum ProtocolCodes {
   END_OF_MESSAGES_CONFIRMATIONS = 3
 };
 
-enum ApplicationStatus {
+enum ApplicationModes {
   EDIT = 1,
   VIEW = 2
 };

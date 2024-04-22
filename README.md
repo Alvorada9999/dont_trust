@@ -1,16 +1,54 @@
 # dont_trust
 
+```bash
+  ;                    
+  ED.                  
+  E#Wi                 
+  E###G.               
+  E#fD#W;     GEEEEEEEL
+  E#t t##L    ,;;L#K;;.
+  E#t  .E#K,     t#E   
+  E#t    j##f    t#E   
+  E#t    :E#K:   t#E   
+  E#t   t##L     t#E   
+  E#t .D#W;      t#E   
+  E#tiW#G.       t#E   
+  E#K##i         t#E   
+  E##D.           fE   
+  E#t              :   
+  L:                   
+```
+<img src='./preview.gif'>
+
+###### Each time a different onion service is created, that being the case, if trying to connect right after the creation, a minute or two may be needed given the fact the onion service may still be having a proper integration to the tor network
+
 Secure peer to peer communication, opsec focused
 
-### Development environment
+## Table of contents
+* [Development environment](#development-environment)
+* [Building](#building)
+* [Usage](#usage)
+* [Protocol Specification](#protocol-specification)
+* [Customization](#customization)
+
+## Development environment
 compile_flags.txt is for [usage with clangd](https://clangd.llvm.org/design/compile-commands#compilation-databases)<br>
 The c standard being used is a dialect from c17, that being gnu17
 
 ## Building
 ### Dependencies
 - gcc
-- [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html) (From openssl3) header files
+- [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) (From openssl3) header files
 - make (Or run the build command from the Makefile directly)
+#### Fedora 39
+```bash
+sudo dnf install openssl-devel
+```
+#### Debian 12
+```bash
+sudo apt-get update
+sudo apt-get install libssl-dev
+```
 
 To build:
 ```bash
@@ -20,7 +58,18 @@ $ make build
 ### Dependencies
 - An [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) conformant terminal with E3 capability (Most of the terminals nowadays, you probably should not need to worry about it if you aren't using some exotic setup)
 - Tor, [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it)
-- [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html) from openssl3
+- [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) from openssl3
+#### Fedora 39
+```bash
+sudo dnf install tor
+sudo dnf install openssl-libs
+```
+#### Debian 12
+```bash
+sudo apt-get update
+sudo apt-get install tor
+sudo apt-get install libssl3
+```
 
 ##### You must provide your rsa private key and the rsa public key from your peer:
 ```bash
@@ -87,3 +136,33 @@ After which should be on the following order:<br>
 
 - An unsigned 32 bit number in network byte order, that's the number of confirmations codes
 - n unsigned 32 bit numbers in network byte order, each being a message code from a particular message (Only your own messages have their code saved in the application, that's implementation dependent)
+
+## Customization
+
+### Changing button for application mode change:<br>
+There are 2, "VIEW" and "EDIT", the default button for changing is the 0x1B ASCII code<br>
+Update "STATUS_CHANGE_BUTTON" at "src/common/common.h" to a desired ASCII code<br>
+
+### Changing buttons for line moving:<br>
+If the program is on "VIEW" mode, bytes coming from stdin are used to go up or down<br>
+Update "UP_BUTTON" or "DOWN_BUTTON" at "src/common/common.h" to a desired ASCII code, the defaults are 'k' for "UP_BUTTON" and 'j' for "DOWN_BUTTON"<br><br>
+
+###### For the following color reletad changes, refer to [some terminal 256 color ids table](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#256-colors)
+### Changing background color:
+Update "TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h" to a desired terminal color id<br>
+
+### Changing status line color:
+Update "STATUS_LINE_TERMINAL_COLOR_CODE" from "src/common/common.h" to a desired terminal color id<br>
+The default is "27" (Some blue tone)
+
+### Changing sent messages color:
+##### Not yet received by peer
+Update the value of "PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
+The default is "196" (Some red tone)
+##### Already received by peer
+Update the value of "PEER_READ_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
+The default is "41" (Some green tone)
+
+### Changing received messages color:
+Update the value of "RECEIVED_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
+The default is "232" (Black)

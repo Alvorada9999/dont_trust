@@ -1,5 +1,5 @@
 // This file is part of dont_trust.
-// Copyright (C) 2023 Kenedy Henrique Bueno Silva
+// Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
 // dont_trust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -58,9 +59,15 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
   }
 }
 
+void sigIntHandler(int signalNumber) {
+  exit(1);
+}
+
 struct termios oldTerminalConfigurations;
 void resetTerminal(void) {
   tcsetattr(STDIN_FILENO, TCSANOW, &oldTerminalConfigurations);
+  printf("\033[0m\033[H\033[0J\033[3J");
+  fflush(stdout);
 }
 
 int8_t peerConnectedSocket = 0;
@@ -71,10 +78,25 @@ void closeConnection(void) {
 }
 
 int main(int argc, char *argv[]) {
+  struct sigaction newSigAction;
+  memset(&newSigAction, 0, sizeof(struct sigaction));
+  newSigAction.sa_handler = &sigWinchHandler;
+  sigaction(SIGWINCH, &newSigAction, NULL);
+  newSigAction.sa_handler = &sigIntHandler;
+  sigaction(SIGINT, &newSigAction, NULL);
+
+  atexit(&resetTerminal);
+  atexit(&closeConnection);
+
+  setDefaultValues(&allMessages);
+  updateBackground(&allMessages.winSize);
+  welcomingMessage();
+  memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
+  setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
+
   Configs configs;
   memset(&configs, 0, sizeof(Configs));
   configs.shouldActAsServer = true;
-
   getConfigs(argc, argv, &configs);
 
   if(configs.shouldActAsServer) {
@@ -97,19 +119,7 @@ int main(int argc, char *argv[]) {
   }
   printNow("Connection established\n");
 
-  struct sigaction newSigAction;
-  memset(&newSigAction, 0, sizeof(struct sigaction));
-  newSigAction.sa_handler = &sigWinchHandler;
-  sigaction(SIGWINCH, &newSigAction, NULL);
-
-  setDefaultValues(&allMessages);
-
   enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
-
-  memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
-  setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
-  atexit(&resetTerminal);
-  atexit(&closeConnection);
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {

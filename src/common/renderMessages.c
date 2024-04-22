@@ -50,30 +50,30 @@ u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes) {
 }
 
 void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
-  static char *redBackgroundEscapeSequence = "\033[41m";
-  uint8_t redBackgroundEscapeSequenceSize = strlen("\033[41m");
-  static char *greenBackgroundEscapeSequence = "\033[42m";
-  uint8_t greenBackgroundEscapeSequenceSize = strlen("\033[42m");
-  static char *resetBackgroundEscapeSequence = "\033[0m";
-  uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
+  static char *escapeSequence = "\033[48;5;";
+  for (uint8_t i=0; i<strlen(escapeSequence) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+    textToOutput[*textToOutputWrittenSize] = escapeSequence[i];
+    (*textToOutputWrittenSize)++;
+    (*maxWritingSize)++;
+  }
   switch (status) {
     case PEER_READ:
-      for (uint8_t i=0; i<greenBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-        textToOutput[*textToOutputWrittenSize] = greenBackgroundEscapeSequence[i];
+      for (uint8_t i=0; i<strlen(PEER_READ_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = PEER_READ_TERMINAL_BACKGROUND_COLOR_ID[i];
         (*textToOutputWrittenSize)++;
         (*maxWritingSize)++;
       }
       break;
     case PEER_NOT_READ:
-      for (uint8_t i=0; i<redBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-        textToOutput[*textToOutputWrittenSize] = redBackgroundEscapeSequence[i];
+      for (uint8_t i=0; i<strlen(PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID[i];
         (*textToOutputWrittenSize)++;
         (*maxWritingSize)++;
       }
       break;
     case RECEIVED:
-      for (uint8_t i=0; i<resetBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-        textToOutput[*textToOutputWrittenSize] = resetBackgroundEscapeSequence[i];
+      for (uint8_t i=0; i<strlen(RECEIVED_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = RECEIVED_TERMINAL_BACKGROUND_COLOR_ID[i];
         (*textToOutputWrittenSize)++;
         (*maxWritingSize)++;
       }
@@ -81,18 +81,28 @@ void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToO
     default:
       break;
   }
+  textToOutput[*textToOutputWrittenSize] = 'm';
+  (*textToOutputWrittenSize)++;
+  (*maxWritingSize)++;
 }
 
 /* Add reset escape sequences 
 to "textToOutput"*/
-void addResetBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
-  static char *resetBackgroundEscapeSequence = "\033[0m";
-  uint8_t resetBackgroundEscapeSequenceSize = strlen("\033[0m");
-  for (uint8_t i=0; i<resetBackgroundEscapeSequenceSize && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-    textToOutput[*textToOutputWrittenSize] = resetBackgroundEscapeSequence[i];
+void addBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToOutputWrittenSize, uint32_t *maxWritingSize) {
+  static char *escapeSequence = "\033[48;5;";
+  for (uint8_t i=0; i<strlen(escapeSequence) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+    textToOutput[*textToOutputWrittenSize] = escapeSequence[i];
     (*textToOutputWrittenSize)++;
     (*maxWritingSize)++;
   }
+  for (uint8_t i=0; i<strlen(TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+    textToOutput[*textToOutputWrittenSize] = TERMINAL_BACKGROUND_COLOR_ID[i];
+    (*textToOutputWrittenSize)++;
+    (*maxWritingSize)++;
+  }
+  textToOutput[*textToOutputWrittenSize] = 'm';
+  (*textToOutputWrittenSize)++;
+  (*maxWritingSize)++;
 }
 
 /*
@@ -110,7 +120,6 @@ int8_t renderMessages(AllMessages *allMessages) {
   u_int32_t amountOfCharsThatCanBeShow = ((uint32_t)winSize.ws_row - 2) * (uint32_t)winSize.ws_col;
   if(winSize.ws_row < 3) return 0;
   if(amountOfCharsThatCanBeShow > DEFAULT_MESSAGE_OUTPUT_SIZE) errExit(4);
-  //let's compromise to use this many memory since malloc is not async-signal-safe
   static char textToOutput[DEFAULT_MESSAGE_OUTPUT_SIZE];
   memset(textToOutput, 0, DEFAULT_MESSAGE_OUTPUT_SIZE);
   u_int32_t textToOutputWrittenSize = 0;
@@ -171,7 +180,7 @@ int8_t renderMessages(AllMessages *allMessages) {
       textToOutputWrittenSize += 1;
     }
     //before "breaking" a line, reset background color
-    addResetBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
+    addBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
     for (u_int16_t i=0; i<winSize.ws_col && textToOutputWrittenSize < maxWritingSize && maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
       textToOutput[textToOutputWrittenSize] = ESPACE;
       textToOutputWrittenSize += 1;
@@ -191,7 +200,7 @@ int8_t renderMessages(AllMessages *allMessages) {
     }
 
   } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize && allMessages->numberOfMessagesBeingShow < DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW);
-  addResetBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
+  addBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
 
   if(maxWritingSize >= winSize.ws_col) {
     allMessages->isThereSpaceLeftOnScreenForMoreMessages = true;

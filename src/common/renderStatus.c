@@ -40,6 +40,6 @@ void renderStatus(uint8_t type, struct winsize *winSize) {
       break;
   }
 
-  printf("\033[%i;0H\033[44m%d/%d | %d\033[0m", winSize->ws_row, numberOfMessagesConfirmationsReceived, numberOfMessagesSent, numberOfMessagesReceived);
+  printf("\033[%i;0H\033[48;5;%sm%d/%d | %d\033[0K\033[48;5;%sm", winSize->ws_row, STATUS_LINE_TERMINAL_COLOR_CODE, numberOfMessagesConfirmationsReceived, numberOfMessagesSent, numberOfMessagesReceived, TERMINAL_BACKGROUND_COLOR_ID);
   fflush(stdout);
 }

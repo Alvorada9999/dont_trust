@@ -35,7 +35,7 @@ void processInput(AllMessages *allMessages) {
     switch (applicationMode) {
       case EDIT:
         switch (processingBuffer[i]) {
-          case ESCAPE:
+          case STATUS_CHANGE_BUTTON:
             applicationMode = VIEW;
             break;
           case DEL:
@@ -65,16 +65,14 @@ void processInput(AllMessages *allMessages) {
         break;
       case VIEW:
         switch (processingBuffer[i]) {
-          case ESCAPE:
+          case STATUS_CHANGE_BUTTON:
             applicationMode = EDIT;
             break;
-          //down
-          case 'j':
+          case DOWN_BUTTON:
             updatePostion(allMessages, 'j');
             raise(SIGWINCH);
             break;
-          //up
-          case 'k':
+          case UP_BUTTON:
             updatePostion(allMessages, 'k');
             raise(SIGWINCH);
             break;

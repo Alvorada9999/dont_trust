@@ -1,5 +1,5 @@
 // This file is part of dont_trust.
-// Copyright (C) 2023 Kenedy Henrique Bueno Silva
+// Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
 // dont_trust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,19 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef DTTERMINALUTIL
-#define DTTERMINALUTIL
+#include <stdio.h>
 
-#define NULLBYTE 0
-#define DEL 127
-#define LINEFEED 10
-#define ESPACE 32
+#include "init.h"
+#include "common.h"
 
-#include <termios.h>
-#include <sys/ioctl.h>
-
-int setCbreak(int fd, struct termios *prevTermios);
-void clearMessages(struct winsize *winSize);
-void printNow(char *string);
-
-#endif
+void updateBackground(struct winsize *winSize) {
+  printf("\033[48;5;%sm\033[H\033[0J", TERMINAL_BACKGROUND_COLOR_ID);
+  fflush(stdout);
+  renderStatus(0, winSize);
+  printf("\033[H");
+  fflush(stdout);
+}

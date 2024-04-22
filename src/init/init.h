@@ -45,5 +45,7 @@ typedef struct {
 void getConfigs(int argc, char *argv[], Configs *configsToUpdate);
 void enableSignalDrivenIoOnSocket(int8_t socketFd, void (*handler)(int, siginfo_t *, void *));
 void setDefaultValues(AllMessages *allMessages);
+void updateBackground(struct winsize *winSize);
+void welcomingMessage(void);
 
 #endif // !init
