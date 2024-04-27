@@ -22,6 +22,7 @@
 
 #define DEFAULT_TOR_PROXY_PORT 9050
 #define DEFAULT_TOR_CONTROL_PORT 9051
+#define MAX_POSSIBLE_RESPONSE_SIZE_SOCKS5_CONNECTION_REQUEST 262
 
 int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber);
 void sendCommand(int32_t socketFd, char *command, int32_t commandSize);

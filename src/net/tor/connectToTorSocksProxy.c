@@ -59,8 +59,8 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
   if (connect(socketFd, (struct sockaddr *)&proxyAddr, sizeof(struct sockaddr_in)) == 0) {
     ssize_t writtenSize = 0;
     ssize_t readSize = 0;
-    char response[6];
-    memset(response, 0, 6);
+    char response[MAX_POSSIBLE_RESPONSE_SIZE_SOCKS5_CONNECTION_REQUEST];
+    memset(response, 0, MAX_POSSIBLE_RESPONSE_SIZE_SOCKS5_CONNECTION_REQUEST);
 
     char gretting[3] = {5, 1, 0};
     while (writtenSize>-1 && writtenSize < 3) {
@@ -68,7 +68,7 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
     }
 
     while (readSize < 2) {
-      readSize += read(socketFd, response + readSize, 2);
+      readSize += read(socketFd, response + readSize, (uint32_t)(2 - readSize));
     }
     if (response[1] != 0) errExit(6);
 
@@ -79,9 +79,9 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
       writtenSize += write(socketFd, connectionRequest + writtenSize, (7 + 62)-(uint32_t)writtenSize);
     }
 
-    memset(response, 0, 6);
-    while (readSize < 6) {
-      readSize += read(socketFd, response + readSize, 6);
+    memset(response, 0, MAX_POSSIBLE_RESPONSE_SIZE_SOCKS5_CONNECTION_REQUEST);
+    while (readSize < 2) {
+      readSize += read(socketFd, response + readSize, (uint32_t)(2 - readSize));
     }
 
     if (response[1] != 0x00) {
@@ -111,6 +111,11 @@ int8_t connectToTorSocksProxy(char *onionAddr, uint16_t portNumber) {
         errExit(14);
         break;
       }
+    }
+
+    //in order to empty the tcp stream from data received from the proxy before messages are exchanged
+    while (readSize != -1) {
+      readSize = recv(socketFd, response, MAX_POSSIBLE_RESPONSE_SIZE_SOCKS5_CONNECTION_REQUEST, MSG_DONTWAIT);
     }
   } else {
     close(socketFd);

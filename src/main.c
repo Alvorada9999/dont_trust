@@ -66,8 +66,6 @@ void sigIntHandler(int signalNumber) {
 struct termios oldTerminalConfigurations;
 void resetTerminal(void) {
   tcsetattr(STDIN_FILENO, TCSANOW, &oldTerminalConfigurations);
-  printf("\033[0m\033[H\033[0J\033[3J");
-  fflush(stdout);
 }
 
 int8_t peerConnectedSocket = 0;
@@ -123,7 +121,7 @@ int main(int argc, char *argv[]) {
 
   while(true) {
     if(allMessages.socketInputStatus.isInputAvailable) {
-      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey, &configs);
+      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey);
     }
     if(allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
       writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pubKey);
