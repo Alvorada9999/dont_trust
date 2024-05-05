@@ -57,16 +57,16 @@ void updateBackgroundColor(uint8_t status, char *textToOutput, uint32_t *textToO
     (*maxWritingSize)++;
   }
   switch (status) {
-    case PEER_READ:
-      for (uint8_t i=0; i<strlen(PEER_READ_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-        textToOutput[*textToOutputWrittenSize] = PEER_READ_TERMINAL_BACKGROUND_COLOR_ID[i];
+    case PEER_RECEIVED:
+      for (uint8_t i=0; i<strlen(PEER_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = PEER_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID[i];
         (*textToOutputWrittenSize)++;
         (*maxWritingSize)++;
       }
       break;
-    case PEER_NOT_READ:
-      for (uint8_t i=0; i<strlen(PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
-        textToOutput[*textToOutputWrittenSize] = PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID[i];
+    case PEER_NOT_RECEIVED:
+      for (uint8_t i=0; i<strlen(PEER_NOT_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID) && *textToOutputWrittenSize < *maxWritingSize && *maxWritingSize < DEFAULT_MESSAGE_OUTPUT_SIZE; i++) {
+        textToOutput[*textToOutputWrittenSize] = PEER_NOT_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID[i];
         (*textToOutputWrittenSize)++;
         (*maxWritingSize)++;
       }

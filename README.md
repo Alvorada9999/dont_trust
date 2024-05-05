@@ -22,7 +22,8 @@
 
 ###### Each time a different onion service is created, that being the case, if trying to connect right after the creation, a minute or two may be needed given the fact the onion service may still be having a proper integration to the tor network
 
-Secure peer to peer communication, opsec focused
+Secure one-to-one communication, opsec focused
+###### Maybe n-to-n someday, but no plans for now, given the fact this application is intended to be small
 
 ## Table of contents
 * [Development environment](#development-environment)
@@ -30,6 +31,7 @@ Secure peer to peer communication, opsec focused
 * [Usage](#usage)
 * [Protocol Specification](#protocol-specification)
 * [Customization](#customization)
+* [Motivation, philosophy and goals](#motivation-philosophy-and-goals)
 
 ## Development environment
 compile_flags.txt is for [usage with clangd](https://clangd.llvm.org/design/compile-commands#compilation-databases)<br>
@@ -57,7 +59,7 @@ $ make build
 ## Usage
 ### Dependencies
 - An [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) conformant terminal with E3 capability (Most of the terminals nowadays, you probably should not need to worry about it if you aren't using some exotic setup)
-- Tor, [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it)
+- Tor [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it, [at least 0.3.2.1-alpha version for v3 support](https://blog.torproject.org/tor-0321-alpha-released-support-next-gen-onion-services-and-kist-scheduler/))
 - [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) from openssl3
 #### Fedora 39
 ```bash
@@ -71,12 +73,13 @@ sudo apt-get install tor
 sudo apt-get install libssl3
 ```
 
-##### You must provide your rsa private key and the rsa public key from your peer:
+### You must provide your rsa private key and the rsa public key from your peer:
+##### Dear tor users, "PGP keys" can be used as long the key is RSA, [which is the default algorithm for key generation in software like GnuPG](https://www.gnupg.org/faq/gnupg-faq.html#new_key_algo) and many others
 ```bash
 $ dont_trust --pKey "./client_private_key_path.txt" --pubKey "./peer_public_key_path.pem"
 ```
-###### The file type does not matter but the keys must be [PEM encoded](https://www.rfc-editor.org/rfc/rfc7468)
-###### The possible sizes are those supported by [libcrypto](https://www.openssl.org/docs/man3.0/man7/crypto.html) from [openssl3](https://www.openssl.org/)
+###### The file type does not matter but the keys must be [PEM encoded](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail#Format)
+###### The possible sizes are those supported by [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) from [openssl3](https://www.openssl.org/)
 
 ### Connecting
 ##### To connect to an ipv4 address:
@@ -157,12 +160,23 @@ The default is "27" (Some blue tone)
 
 ### Changing sent messages color:
 ##### Not yet received by peer
-Update the value of "PEER_NOT_READ_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
+Update the value of "PEER_NOT_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
 The default is "196" (Some red tone)
 ##### Already received by peer
-Update the value of "PEER_READ_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
+Update the value of "PEER_RECEIVED_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
 The default is "41" (Some green tone)
 
 ### Changing received messages color:
 Update the value of "RECEIVED_TERMINAL_BACKGROUND_COLOR_ID" from "src/common/common.h"<br>
 The default is "232" (Black)
+
+## Motivation, philosophy and goals
+
+- The need for information confidentiality
+- Guarantee that the software does only what is intended
+- No time to manually check the code of big open source projects
+- No need for large communication protocols
+- Small codebase, easy to understand and hack
+- Secure by default
+- Small number of source files
+- Minimal dependencies

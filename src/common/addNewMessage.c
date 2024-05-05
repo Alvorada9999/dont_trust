@@ -30,7 +30,7 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
   Message *newMessage = malloc(sizeof(Message));
   memset(newMessage, 0, sizeof(Message));
   newMessage->size = size;
-  newMessage->status = PEER_NOT_READ;
+  newMessage->status = PEER_NOT_RECEIVED;
   newMessage->string = text;
   newMessage->nextMessage = NULL;
 

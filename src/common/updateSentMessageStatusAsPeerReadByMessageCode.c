@@ -20,6 +20,6 @@
 
 void updateSentMessageStatusAsPeerReadByMessageCode(AllMessages *allMessages, uint32_t messageCode) {
   if(messageCode <= allMessages->messagesByCode.currentSize) {
-    allMessages->messagesByCode.array[messageCode]->status = PEER_READ;
+    allMessages->messagesByCode.array[messageCode]->status = PEER_RECEIVED;
   }
 }
