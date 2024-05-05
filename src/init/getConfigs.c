@@ -95,8 +95,8 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
         commandLineOptions -> chosenOption = ONION_ADDR;
         break;
       case 'h':
-        printf("%s", helpMessage);
-        fflush(stdout);
+        printf("\033[0m\033[H\033[0J\033[3J%s", helpMessage);
+        exit(EXIT_SUCCESS);
         break;
       case PKEY_PATH_OPTION:
         commandLineOptions -> pKey = createPrivateKeyFromFilePath(optarg);

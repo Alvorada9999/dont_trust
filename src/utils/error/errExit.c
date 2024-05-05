@@ -73,8 +73,6 @@ void errExit(uint16_t errCode) {
   errors[40] = "AUTHENTICATE command responded with an error code\n";
   errors[42] = "ADD_ONION command responded with an error code\n";
 
-  printf("%s", errors[errCode]);
-  fflush(stdout);
-
+  printf("\033[0m\033[H\033[0J\033[3J%s", errors[errCode]);
   exit(errCode);
 }
