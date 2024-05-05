@@ -28,6 +28,7 @@ Secure one-to-one communication, opsec focused
 ## Table of contents
 * [Development environment](#development-environment)
 * [Building](#building)
+* [Installation](#installation)
 * [Usage](#usage)
 * [Protocol Specification](#protocol-specification)
 * [Customization](#customization)
@@ -44,19 +45,21 @@ The c standard being used is a dialect from c17, that being gnu17
 - make (Or run the build command from the Makefile directly)
 #### Fedora 39
 ```bash
-sudo dnf install openssl-devel
+sudo dnf install openssl-devel openssl-libs
 ```
 #### Debian 12
 ```bash
 sudo apt-get update
-sudo apt-get install libssl-dev
+sudo apt-get install libssl-dev libssl3
 ```
 
 To build:
 ```bash
 $ make build
 ```
-## Usage
+The result will be at ./buid/dont_trust
+## Installation
+Just download the binary of choice at the releases page
 ### Dependencies
 - An [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) conformant terminal with E3 capability (Most of the terminals nowadays, you probably should not need to worry about it if you aren't using some exotic setup)
 - Tor [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it, [at least 0.3.2.1-alpha version for v3 support](https://blog.torproject.org/tor-0321-alpha-released-support-next-gen-onion-services-and-kist-scheduler/))
@@ -72,6 +75,11 @@ sudo apt-get update
 sudo apt-get install tor
 sudo apt-get install libssl3
 ```
+## Usage
+
+- Press "ESC" to change between "EDIT" and "VIEW" modes
+- Press "j" to go down and "k" to go up
+- Press "ENTER" to send the message
 
 ### You must provide your rsa private key and the rsa public key from your peer:
 ##### Dear tor users, "PGP keys" can be used as long the key is RSA, [which is the default algorithm for key generation in software like GnuPG](https://www.gnupg.org/faq/gnupg-faq.html#new_key_algo) and many others
@@ -143,7 +151,7 @@ After which should be on the following order:<br>
 ## Customization
 
 ### Changing button for application mode change:<br>
-There are 2, "VIEW" and "EDIT", the default button for changing is the 0x1B ASCII code<br>
+There are 2, "VIEW" and "EDIT", the default button for changing is the 0x1B ASCII code (ESC button) <br>
 Update "STATUS_CHANGE_BUTTON" at "src/common/common.h" to a desired ASCII code<br>
 
 ### Changing buttons for line moving:<br>
@@ -176,7 +184,6 @@ The default is "232" (Black)
 - Guarantee that the software does only what is intended
 - No time to manually check the code of big open source projects
 - No need for large communication protocols
-- Small codebase, easy to understand and hack
+- Very organized codebase files, easy to understand and hack
 - Secure by default
-- Small number of source files
 - Minimal dependencies
