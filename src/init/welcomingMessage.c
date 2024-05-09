@@ -1,7 +1,7 @@
-// This file is part of dont_trust.
+// This file is part of donttrust.
 // Copyright (C) 2024 Kenedy Henrique Bueno Silva
 
-// dont_trust is free software: you can redistribute it and/or modify
+// donttrust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 void welcomingMessage(void) {
-  printf("dont_trust is free software under the GPL3.0 license\n\
+  printf("donttrust is free software under the GPL3.0 license\n\
   ;                    \n\
   ED.                  \n\
   E#Wi                 \n\

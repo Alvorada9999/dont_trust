@@ -1,7 +1,7 @@
-// This file is part of dont_trust.
+// This file is part of donttrust.
 // Copyright (C) 2023 Kenedy Henrique Bueno Silva
 
-// dont_trust is free software: you can redistribute it and/or modify
+// donttrust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -207,7 +207,7 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
                 messageConfirmationCode = ntohl(messageConfirmationCode);
 
                 if(messageConfirmationCode < 0 || messageConfirmationCode > allMessages->messagesByCode.length) errExit(25);
-                updateSentMessageStatusAsPeerReadByMessageCode(allMessages, messageConfirmationCode);
+                updateSentMessageStatusAsReceivedReadByMessageCode(allMessages, messageConfirmationCode);
                 if(isMessageOnScreen(allMessages, messageConfirmationCode)) {
                   isAnyOfTheMessagesFromCodesOnScreen = true;
                 }

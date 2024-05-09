@@ -1,7 +1,7 @@
-// This file is part of dont_trust.
+// This file is part of donttrust.
 // Copyright (C) 2023 Kenedy Henrique Bueno Silva
 
-// dont_trust is free software: you can redistribute it and/or modify
+// donttrust is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
@@ -150,7 +150,7 @@ int8_t renderMessages(AllMessages *allMessages);
 int8_t updatePostion(AllMessages *allMessages, char jOrK);
 u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes);
 
-void updateSentMessageStatusAsPeerReadByMessageCode(AllMessages *allMessages, uint32_t messageCode);
+void updateSentMessageStatusAsReceivedReadByMessageCode(AllMessages *allMessages, uint32_t messageCode);
 
 struct MessageCode {
   uint32_t codeInNetworkByteOrder;

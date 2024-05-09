@@ -1,4 +1,4 @@
-# dont_trust
+# donttrust
 
 ```bash
   ;                    
@@ -57,7 +57,7 @@ To build:
 ```bash
 $ make build
 ```
-The result will be at ./buid/dont_trust
+The result will be at ./buid/donttrust
 ## Installation
 Just download the binary of choice at the releases page
 ### Dependencies
@@ -84,7 +84,7 @@ sudo apt-get install libssl3
 ### You must provide your rsa private key and the rsa public key from your peer:
 ##### Dear tor users, "PGP keys" can be used as long the key is RSA, [which is the default algorithm for key generation in software like GnuPG](https://www.gnupg.org/faq/gnupg-faq.html#new_key_algo) and many others
 ```bash
-$ dont_trust --pKey "./client_private_key_path.txt" --pubKey "./peer_public_key_path.pem"
+$ donttrust --pKey "./client_private_key_path.txt" --pubKey "./peer_public_key_path.pem"
 ```
 ###### The file type does not matter but the keys must be [PEM encoded](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail#Format)
 ###### The possible sizes are those supported by [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) from [openssl3](https://www.openssl.org/)
@@ -92,18 +92,18 @@ $ dont_trust --pKey "./client_private_key_path.txt" --pubKey "./peer_public_key_
 ### Connecting
 ##### To connect to an ipv4 address:
 ```bash
-$ dont_trust -t 192.168.0.1
+$ donttrust -t 192.168.0.1
 ```
 ###### The address must be human readable
 ##### To connect to an onion address:
 ```bash
-$ dont_trust -o vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion
+$ donttrust -o vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion
 ```
 
 ### Listening for connections
 ##### To listen for normal ones:
 ```bash
-$ dont_trust ...
+$ donttrust ...
 ```
 ###### Just dont use any connection option, that being "-t" and "-o"
 ##### To listen for onion ones:
@@ -125,7 +125,7 @@ $ sudo kill -s SIGHUP <tor process id>
 
 Just provide your password
 ```bash
-$ dont_trust --torControlPassword <your_password>
+$ donttrust --torControlPassword <your_password>
 ```
 
 ## Protocol Specification
