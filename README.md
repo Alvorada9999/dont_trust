@@ -59,22 +59,7 @@ $ make build
 ```
 The result will be at ./buid/donttrust
 ## Installation
-Just download the binary of choice at the releases page
-### Dependencies
-- An [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code) conformant terminal with E3 capability (Most of the terminals nowadays, you probably should not need to worry about it if you aren't using some exotic setup)
-- Tor [the central project, providing the core software for using and participating in the Tor network, not the browser](https://gitlab.torproject.org/tpo/core/tor/) (If you intend to establish connections over it, [at least 0.3.2.1-alpha version for v3 support](https://blog.torproject.org/tor-0321-alpha-released-support-next-gen-onion-services-and-kist-scheduler/))
-- [libcrypto3](https://www.openssl.org/docs/man3.0/man7/crypto.html) from openssl3
-#### Fedora 39
-```bash
-sudo dnf install tor
-sudo dnf install openssl-libs
-```
-#### Debian 12
-```bash
-sudo apt-get update
-sudo apt-get install tor
-sudo apt-get install libssl3
-```
+Download and install the package of choice at the [releases page](https://github.com/Alvorada9999/dont_trust/releases)
 ## Usage
 
 - Press "ESC" to change between "EDIT" and "VIEW" modes

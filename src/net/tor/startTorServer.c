@@ -77,7 +77,7 @@ int8_t startTorServer(char *password, int32_t passwordLength, int8_t *torSocketF
   memset(&localServerAddr, 0, sizeof(struct sockaddr_in));
   localServerAddr.sin_family = AF_INET;
   localServerAddr.sin_port = htons(8000);
-  localServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  localServerAddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
   if(bind(listeningSocketFd, (struct sockaddr *)&localServerAddr, sizeof(struct sockaddr_in)) == -1) errExit(19);
   //server here
