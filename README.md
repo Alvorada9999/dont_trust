@@ -55,7 +55,7 @@ sudo apt-get install libssl-dev libssl3
 
 To build:
 ```bash
-$ make build
+$ make
 ```
 The result will be at ./buid/donttrust
 ## Installation

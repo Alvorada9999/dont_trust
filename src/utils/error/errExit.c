@@ -21,7 +21,7 @@
 #include "error.h"
 
 void errExit(uint16_t errCode) {
-  char *errors[60];
+  char *errors[44];
   errors[1] = "Error when blocking all signals\n";
   errors[2] = "Error unblocking int and winch signals\n";
   errors[3] = "Error setting terminal in break state\n";
@@ -72,6 +72,8 @@ void errExit(uint16_t errCode) {
   errors[41] = "PROTOCOLINFO command responded with an unsupported PIPEVERSION\n";
   errors[40] = "AUTHENTICATE command responded with an error code\n";
   errors[42] = "ADD_ONION command responded with an error code\n";
+
+  errors[43] = "Not enough memory\n";
 
   printf("\033[0m\033[H\033[0J\033[3J%s", errors[errCode]);
   exit(errCode);

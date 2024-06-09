@@ -15,11 +15,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include "common.h"
+#include "error.h"
 
 void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t codeInNetworkByteOrder) {
   MessageCode *messageCode = malloc(sizeof(MessageCode));
+  if(messageCode == NULL && errno == ENOMEM) errExit(43);
   messageCode->next = NULL;
   messageCode->codeInNetworkByteOrder = codeInNetworkByteOrder;
 

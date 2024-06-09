@@ -15,19 +15,23 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "common.h"
+#include "error.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <signal.h>
 #include <unistd.h>
 
 void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner) {
   char *text = malloc(size);
+  if(text == NULL && errno == ENOMEM) errExit(43);
   memcpy(text, message, size);
 
   Message *newMessage = malloc(sizeof(Message));
+  if(newMessage == NULL && errno == ENOMEM) errExit(43);
   memset(newMessage, 0, sizeof(Message));
   newMessage->size = size;
   newMessage->status = PEER_NOT_RECEIVED;
@@ -53,6 +57,7 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
       allMessages->messagesByCode.availableSpace--;
     } else {
       Message **newArray = malloc(sizeof(Message)*allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
+      if(newArray == NULL && errno == ENOMEM) errExit(43);
       memcpy(newArray, allMessages->messagesByCode.array, allMessages->messagesByCode.currentSize);
       free(allMessages->messagesByCode.array);
       allMessages->messagesByCode.array = newArray;
