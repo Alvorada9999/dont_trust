@@ -31,7 +31,7 @@ void setDefaultValues(AllMessages *allMessages) {
   allMessages->lastMessage = NULL;
   allMessages->isThereSpaceLeftOnScreenForMoreMessages = true;
 
-  allMessages->messagesByCode.array = malloc(sizeof(Message)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
+  allMessages->messagesByCode.array = malloc(sizeof(Message*)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
   if(allMessages->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
   allMessages->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
   allMessages->messagesByCode.currentSize = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;

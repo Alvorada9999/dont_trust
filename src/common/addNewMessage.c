@@ -34,7 +34,6 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
   if(newMessage == NULL && errno == ENOMEM) errExit(43);
   memset(newMessage, 0, sizeof(Message));
   newMessage->size = size;
-  newMessage->status = PEER_NOT_RECEIVED;
   newMessage->string = text;
   newMessage->nextMessage = NULL;
 
@@ -51,20 +50,19 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
   allMessages->sizeInChars += size;
 
   if(owner == MESSAGE_FROM_MYSELF) {
-    newMessage->code = allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace;
+    newMessage->status = PEER_NOT_RECEIVED;
+    newMessage->code = allMessages->messagesByCode.length;
     if(allMessages->messagesByCode.availableSpace > 0) {
-      allMessages->messagesByCode.array[allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace] = newMessage;
+      allMessages->messagesByCode.array[allMessages->messagesByCode.length] = newMessage;
       allMessages->messagesByCode.availableSpace--;
     } else {
-      Message **newArray = malloc(sizeof(Message)*allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
-      if(newArray == NULL && errno == ENOMEM) errExit(43);
-      memcpy(newArray, allMessages->messagesByCode.array, allMessages->messagesByCode.currentSize);
-      free(allMessages->messagesByCode.array);
-      allMessages->messagesByCode.array = newArray;
-      allMessages->messagesByCode.currentSize = allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
+      allMessages->messagesByCode.array = realloc(allMessages->messagesByCode.array, sizeof(Message*)*(allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY));
+      if(allMessages->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
 
-      allMessages->messagesByCode.array[allMessages->messagesByCode.currentSize-allMessages->messagesByCode.availableSpace] = newMessage;
+      allMessages->messagesByCode.currentSize = allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
       allMessages->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY-1;
+
+      allMessages->messagesByCode.array[allMessages->messagesByCode.length] = newMessage;
     }
     allMessages->messagesByCode.length++;
   } else {

@@ -89,7 +89,7 @@ struct Message {
   struct Message *nextMessage;
   struct Message *previousMessage;
   uint8_t status;
-  //Peer messages don't have code
+  //Peer messages don't have their code saved
   uint32_t code;
 };
 

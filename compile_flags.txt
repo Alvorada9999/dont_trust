@@ -2,5 +2,15 @@
 -Wall
 -Wextra
 -Wsign-conversion
--Ibuild
+
+-Isrc/common
+-Isrc/crypto
+-Isrc/init
+-Isrc/net
+-Isrc/net/tor
+-Isrc/utils/error
+-Isrc/utils/signal
+-Isrc/utils/string
+-Isrc/utils/terminal
+
 -std=gnu17
