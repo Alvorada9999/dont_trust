@@ -25,7 +25,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner) {
+void addNewMessage(ProgramData *programData, char *message, uint16_t size, uint8_t owner) {
   char *text = malloc(size);
   if(text == NULL && errno == ENOMEM) errExit(43);
   memcpy(text, message, size);
@@ -37,39 +37,39 @@ void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8
   newMessage->string = text;
   newMessage->nextMessage = NULL;
 
-  if(allMessages->sizeInChars > 0) {
-    allMessages->lastMessage->nextMessage = newMessage;
-    newMessage->previousMessage = allMessages->lastMessage;
+  if(programData->sizeInChars > 0) {
+    programData->lastMessage->nextMessage = newMessage;
+    newMessage->previousMessage = programData->lastMessage;
   } else {
     newMessage->previousMessage = NULL;
-    allMessages->currentStartingMessage = newMessage;
-    allMessages->currentStartingMessageCharPosition = 0;
+    programData->currentStartingMessage = newMessage;
+    programData->currentStartingMessageCharPosition = 0;
   }
 
-  allMessages->lastMessage = newMessage;
-  allMessages->sizeInChars += size;
+  programData->lastMessage = newMessage;
+  programData->sizeInChars += size;
 
   if(owner == MESSAGE_FROM_MYSELF) {
     newMessage->status = PEER_NOT_RECEIVED;
-    newMessage->code = allMessages->messagesByCode.length;
-    if(allMessages->messagesByCode.availableSpace > 0) {
-      allMessages->messagesByCode.array[allMessages->messagesByCode.length] = newMessage;
-      allMessages->messagesByCode.availableSpace--;
+    newMessage->code = programData->messagesByCode.length;
+    if(programData->messagesByCode.availableSpace > 0) {
+      programData->messagesByCode.array[programData->messagesByCode.length] = newMessage;
+      programData->messagesByCode.availableSpace--;
     } else {
-      allMessages->messagesByCode.array = realloc(allMessages->messagesByCode.array, sizeof(Message*)*(allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY));
-      if(allMessages->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
+      programData->messagesByCode.array = realloc(programData->messagesByCode.array, sizeof(Message*)*(programData->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY));
+      if(programData->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
 
-      allMessages->messagesByCode.currentSize = allMessages->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
-      allMessages->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY-1;
+      programData->messagesByCode.currentSize = programData->messagesByCode.currentSize+DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
+      programData->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY-1;
 
-      allMessages->messagesByCode.array[allMessages->messagesByCode.length] = newMessage;
+      programData->messagesByCode.array[programData->messagesByCode.length] = newMessage;
     }
-    allMessages->messagesByCode.length++;
+    programData->messagesByCode.length++;
   } else {
     newMessage->status = RECEIVED;
   }
 
-  if(!allMessages->socketOutputStatus.isThereAnythingBeingSent && allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
+  if(!programData->socketOutputStatus.isThereAnythingBeingSent && programData->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
     static union sigval sigVal;
     // sigVal.sival_int = 3;
     sigqueue(getpid(), SIGRTMIN, sigVal);

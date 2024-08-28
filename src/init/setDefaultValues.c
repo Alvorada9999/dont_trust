@@ -24,23 +24,23 @@
 #include "init.h"
 #include "error.h"
 
-void setDefaultValues(AllMessages *allMessages) {
-  allMessages->sizeInChars = 0;
-  allMessages->currentStartingMessage = NULL;
-  allMessages->currentStartingMessageCharPosition = 0;
-  allMessages->lastMessage = NULL;
-  allMessages->isThereSpaceLeftOnScreenForMoreMessages = true;
+void setDefaultValues(ProgramData *programData) {
+  programData->sizeInChars = 0;
+  programData->currentStartingMessage = NULL;
+  programData->currentStartingMessageCharPosition = 0;
+  programData->lastMessage = NULL;
+  programData->isThereSpaceLeftOnScreenForMoreMessages = true;
 
-  allMessages->messagesByCode.array = malloc(sizeof(Message*)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
-  if(allMessages->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
-  allMessages->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
-  allMessages->messagesByCode.currentSize = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
-  allMessages->messagesByCode.length = 0;
-  allMessages->messagesByCode.numberOfSentMessages = 0;
+  programData->messagesByCode.array = malloc(sizeof(Message*)*DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY);
+  if(programData->messagesByCode.array == NULL && errno == ENOMEM) errExit(43);
+  programData->messagesByCode.availableSpace = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
+  programData->messagesByCode.currentSize = DEFAULT_SIZE_FOR_MESSAGES_BY_CODE_ARRAY;
+  programData->messagesByCode.length = 0;
+  programData->messagesByCode.numberOfSentMessages = 0;
 
-  allMessages->socketOutputStatus.isThereAnythingBeingSent = false;
-  allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
-  allMessages->socketInputStatus.isInputAvailable = false;
+  programData->socketOutputStatus.isThereAnythingBeingSent = false;
+  programData->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
+  programData->socketInputStatus.isInputAvailable = false;
 
-  ioctl(STDIN_FILENO, TIOCGWINSZ, &allMessages->winSize);
+  ioctl(STDIN_FILENO, TIOCGWINSZ, &programData->winSize);
 }

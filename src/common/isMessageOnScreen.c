@@ -17,9 +17,9 @@
 #include <stdint.h>
 #include "common.h"
 
-bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode) {
+bool isMessageOnScreen(ProgramData *programData, uint32_t messageCode) {
   for(uint16_t i=0; i<DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW; i++) {
-    if(allMessages->messagesBeingShowCode[i] == messageCode) return true;
+    if(programData->messagesBeingShowCode[i] == messageCode) return true;
   }
   return false;
 }

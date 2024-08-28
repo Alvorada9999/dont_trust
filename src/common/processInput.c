@@ -23,7 +23,7 @@
 #include "common.h"
 #include "terminal.h"
 
-void processInput(AllMessages *allMessages) {
+void processInput(ProgramData *programData) {
   static char inputBuffer[MAX_MESSAGE_SIZE];
   static uint16_t inputBufferSize = 0;
   static int16_t lastReadSize = 0;
@@ -41,17 +41,17 @@ void processInput(AllMessages *allMessages) {
           case DEL:
             if(inputBufferSize > 0) {
               inputBufferSize -= 1;
-              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &programData->winSize);
             }
             break;
           case LINEFEED:
             if(inputBufferSize > 0) {
-              addNewMessage(allMessages, inputBuffer, inputBufferSize, MESSAGE_FROM_MYSELF);
-              if(allMessages->isThereSpaceLeftOnScreenForMoreMessages) {
+              addNewMessage(programData, inputBuffer, inputBufferSize, MESSAGE_FROM_MYSELF);
+              if(programData->isThereSpaceLeftOnScreenForMoreMessages) {
                 raise(SIGWINCH);
               }
               inputBufferSize = 0;
-              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &programData->winSize);
             }
             break;
           default:
@@ -59,7 +59,7 @@ void processInput(AllMessages *allMessages) {
             if(inputBufferSize < MAX_MESSAGE_SIZE && *(processingBuffer+i) > 31 && *(processingBuffer+i) < 127) {
               inputBuffer[inputBufferSize] = processingBuffer[i];
               inputBufferSize += 1;
-              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &allMessages->winSize);
+              renderCurrentlyBeingWrittenMessage(inputBuffer, inputBufferSize, &programData->winSize);
             }
         }
         break;
@@ -69,11 +69,11 @@ void processInput(AllMessages *allMessages) {
             applicationMode = EDIT;
             break;
           case DOWN_BUTTON:
-            updatePostion(allMessages, 'j');
+            updatePostion(programData, 'j');
             raise(SIGWINCH);
             break;
           case UP_BUTTON:
-            updatePostion(allMessages, 'k');
+            updatePostion(programData, 'k');
             raise(SIGWINCH);
             break;
         }

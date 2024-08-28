@@ -25,23 +25,23 @@
 
 #include "common.h"
 
-int8_t updatePostion(AllMessages *allMessages, char jOrK) {
-  uint32_t remainingRowSpace = allMessages->winSize.ws_col;
+int8_t updatePostion(ProgramData *programData, char jOrK) {
+  uint32_t remainingRowSpace = programData->winSize.ws_col;
   uint16_t wordSize = 0;
-  Message *currentMessage = allMessages->currentStartingMessage;
+  Message *currentMessage = programData->currentStartingMessage;
   uint32_t readSize;
   if(currentMessage == NULL) return 0;
 
   switch (jOrK) {
     case 'j':
-      if(currentMessage->size-allMessages->currentStartingMessageCharPosition <= remainingRowSpace && currentMessage->nextMessage != NULL) {
-        allMessages->currentStartingMessage = currentMessage->nextMessage;
-        allMessages->currentStartingMessageCharPosition = 0;
-        currentMessage = allMessages->currentStartingMessage;
+      if(currentMessage->size-programData->currentStartingMessageCharPosition <= remainingRowSpace && currentMessage->nextMessage != NULL) {
+        programData->currentStartingMessage = currentMessage->nextMessage;
+        programData->currentStartingMessageCharPosition = 0;
+        currentMessage = programData->currentStartingMessage;
         break;
       }
 
-      readSize = allMessages->currentStartingMessageCharPosition;
+      readSize = programData->currentStartingMessageCharPosition;
 
       while (wordSize <= remainingRowSpace && readSize < currentMessage->size) {
         wordSize = getWordSize(currentMessage->string+readSize, currentMessage->size - readSize);
@@ -52,46 +52,46 @@ int8_t updatePostion(AllMessages *allMessages, char jOrK) {
         }
       }
 
-      if(wordSize <= allMessages->winSize.ws_col){
-        allMessages->currentStartingMessageCharPosition = readSize;
+      if(wordSize <= programData->winSize.ws_col){
+        programData->currentStartingMessageCharPosition = readSize;
       } else {
-        allMessages->currentStartingMessageCharPosition = readSize + remainingRowSpace;
+        programData->currentStartingMessageCharPosition = readSize + remainingRowSpace;
       }
       break;
     case 'k':
       readSize = 0;
 
-      if(allMessages->currentStartingMessageCharPosition == 0 && currentMessage->previousMessage != NULL) {
-        allMessages->currentStartingMessage = currentMessage->previousMessage;
-        allMessages->currentStartingMessageCharPosition = currentMessage->previousMessage->size;
-        currentMessage = allMessages->currentStartingMessage;
+      if(programData->currentStartingMessageCharPosition == 0 && currentMessage->previousMessage != NULL) {
+        programData->currentStartingMessage = currentMessage->previousMessage;
+        programData->currentStartingMessageCharPosition = currentMessage->previousMessage->size;
+        currentMessage = programData->currentStartingMessage;
       }
 
       uint32_t currentLineStartingPosition = 0, previousLineStartingPosition = 0;
-      while (readSize < allMessages->currentStartingMessageCharPosition) {
+      while (readSize < programData->currentStartingMessageCharPosition) {
         wordSize = getWordSize(currentMessage->string+readSize, currentMessage->size - readSize);
         if(wordSize <= remainingRowSpace) {
           remainingRowSpace -= wordSize;
           readSize += wordSize;
         } else {
           previousLineStartingPosition = currentLineStartingPosition;
-          if(wordSize <= allMessages->winSize.ws_col) {
+          if(wordSize <= programData->winSize.ws_col) {
             currentLineStartingPosition = readSize;
             readSize += wordSize;
-            remainingRowSpace = allMessages->winSize.ws_col - wordSize;
+            remainingRowSpace = programData->winSize.ws_col - wordSize;
           } else {
             currentLineStartingPosition = readSize + remainingRowSpace;
             readSize += remainingRowSpace;
-            remainingRowSpace = allMessages->winSize.ws_col;
+            remainingRowSpace = programData->winSize.ws_col;
           }
         }
       }
 
       if(readSize == currentLineStartingPosition) {
-        allMessages->currentStartingMessageCharPosition = previousLineStartingPosition;
+        programData->currentStartingMessageCharPosition = previousLineStartingPosition;
         break;
       }
-      allMessages->currentStartingMessageCharPosition = currentLineStartingPosition;
+      programData->currentStartingMessageCharPosition = currentLineStartingPosition;
 
       break;
   }

@@ -25,20 +25,20 @@
 #include "dt_crypto.h"
 #include "net.h"
 
-void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey) {
+void writeToPeer(ProgramData *programData, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey) {
 
-  while(messageCodesToBeSentBackAsConfirmationQueue->size > 0 || allMessages->messagesByCode.length > allMessages->messagesByCode.numberOfSentMessages) {
+  while(messageCodesToBeSentBackAsConfirmationQueue->size > 0 || programData->messagesByCode.length > programData->messagesByCode.numberOfSentMessages) {
 
     static uint8_t writingStatus = WRITING_NOTHING;
     switch (writingStatus) {
       case WRITING_NOTHING:
         if(messageCodesToBeSentBackAsConfirmationQueue->size > 0) {
           writingStatus = WRITING_MESSAGES_CONFIRMATIONS;
-          allMessages->socketOutputStatus.isThereAnythingBeingSent = true;
+          programData->socketOutputStatus.isThereAnythingBeingSent = true;
         } else {
-          if(allMessages->messagesByCode.length > allMessages->messagesByCode.numberOfSentMessages) {
+          if(programData->messagesByCode.length > programData->messagesByCode.numberOfSentMessages) {
             writingStatus = WRITING_MESSAGES;
-            allMessages->socketOutputStatus.isThereAnythingBeingSent = true;
+            programData->socketOutputStatus.isThereAnythingBeingSent = true;
           }
         }
         break;
@@ -68,7 +68,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
         } while (lastWriteSize != -1 && writtenSize < 9);
 
         if(lastWriteSize == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-          allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = false;
+          programData->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = false;
           return;
         }
 
@@ -78,7 +78,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
         startedSending = false;
         writtenSize = 0;
         lastWriteSize = 0;
-        allMessages->socketOutputStatus.isThereAnythingBeingSent = false;
+        programData->socketOutputStatus.isThereAnythingBeingSent = false;
 
         break;
       }
@@ -107,10 +107,10 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
         if(!startedWriting) {
           startedWriting = true;
           static Message *messageToBeSent;
-          messageToBeSent = allMessages->messagesByCode.array[allMessages->messagesByCode.numberOfSentMessages];
+          messageToBeSent = programData->messagesByCode.array[programData->messagesByCode.numberOfSentMessages];
 
           static uint32_t messageCodeInNetworkByteOrder = 0;
-          messageCodeInNetworkByteOrder = htonl(allMessages->messagesByCode.numberOfSentMessages);
+          messageCodeInNetworkByteOrder = htonl(programData->messagesByCode.numberOfSentMessages);
           memcpy(buffer+messageCodeInfoIndex, &messageCodeInNetworkByteOrder, TCP_STREAM_MESSAGE_CODE_INFO_LENGTH/8);
 
           static uint32_t cipherTextSizeInNetworkByteOrder = 0;
@@ -128,7 +128,7 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
             if(lastWriteSize != -1) dataWrittenSize += lastWriteSize;
           } while (lastWriteSize != -1 && dataWrittenSize < numberOfBytesToSend);
           if(lastWriteSize == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-            allMessages->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = false;
+            programData->socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = false;
             return;
           }
         }
@@ -143,11 +143,11 @@ void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messag
           SESSION_KEY_LENGTH;
         startedWriting = false;
         dataWrittenSize = 0;
-        allMessages->socketOutputStatus.isThereAnythingBeingSent = false;
+        programData->socketOutputStatus.isThereAnythingBeingSent = false;
 
-        allMessages->messagesByCode.numberOfSentMessages += 1;
+        programData->messagesByCode.numberOfSentMessages += 1;
 
-        renderStatus(MESSAGE_SENT, &allMessages->winSize);
+        renderStatus(MESSAGE_SENT, &programData->winSize);
 
         break;
       }

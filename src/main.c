@@ -28,13 +28,13 @@
 #include "net.h"
 #include "tor.h"
 
-AllMessages allMessages;
+ProgramData programData;
 MessageCodesToBeSentBackQueue messageCodesToBeSentBackAsConfirmationQueue = { .firstElement = NULL, .lastElement = NULL, .size = 0 };
 
 void sigWinchHandler(int sigNumber) {
-  ioctl(STDIN_FILENO, TIOCGWINSZ, &allMessages.winSize);
-  clearMessages(&allMessages.winSize);
-  renderMessages(&allMessages);
+  ioctl(STDIN_FILENO, TIOCGWINSZ, &programData.winSize);
+  clearMessages(&programData.winSize);
+  renderMessages(&programData);
 }
 
 void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
@@ -49,11 +49,11 @@ void handleSocketIo(int signalNumber, siginfo_t *info, void *x) {
 
   switch (event) {
     case POLL_IN: {
-      allMessages.socketInputStatus.isInputAvailable = true;
+      programData.socketInputStatus.isInputAvailable = true;
       break;
     }
     case POLL_OUT: {
-      allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
+      programData.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer = true;
       break;
     }
   }
@@ -86,8 +86,8 @@ int main(int argc, char *argv[]) {
   atexit(&resetTerminal);
   atexit(&closeConnection);
 
-  setDefaultValues(&allMessages);
-  updateBackground(&allMessages.winSize);
+  setDefaultValues(&programData);
+  updateBackground(&programData.winSize);
   welcomingMessage();
   memset(&oldTerminalConfigurations, 0, sizeof(struct termios));
   setCbreak(STDIN_FILENO, &oldTerminalConfigurations);
@@ -120,12 +120,12 @@ int main(int argc, char *argv[]) {
   enableSignalDrivenIoOnSocket(peerConnectedSocket, &handleSocketIo);
 
   while(true) {
-    if(allMessages.socketInputStatus.isInputAvailable) {
-      readFromPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey);
+    if(programData.socketInputStatus.isInputAvailable) {
+      readFromPeer(&programData, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pKey);
     }
-    if(allMessages.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
-      writeToPeer(&allMessages, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pubKey);
+    if(programData.socketOutputStatus.isThereAnySpaceOnTheSocketSendBuffer) {
+      writeToPeer(&programData, &messageCodesToBeSentBackAsConfirmationQueue, &peerConnectedSocket, configs.pubKey);
     }
-    processInput(&allMessages);
+    processInput(&programData);
   }
 }

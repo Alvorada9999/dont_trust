@@ -37,7 +37,7 @@
 #define GETTING_MESSAGE_CONFIRMATION 7
 #define FINALIZING_READING_MESSAGE_CONFIRMATIONS 8
 
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey) {
+void readFromPeer(ProgramData *programData, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey) {
   static char buffer[MAX_MESSAGE_SIZE];
   static int32_t lastReadSize = 0;
   static int32_t inputLeftToReadSize;
@@ -145,14 +145,14 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
               }
             }
             case FINALIZING_READING_MESSAGE: {
-              //add message to allMessages
-              addNewMessage(allMessages, plainText, messageSize, MESSAGE_FROM_PEER);
-              if(allMessages->isThereSpaceLeftOnScreenForMoreMessages) {
+              //add message to programData
+              addNewMessage(programData, plainText, messageSize, MESSAGE_FROM_PEER);
+              if(programData->isThereSpaceLeftOnScreenForMoreMessages) {
                 raise(SIGWINCH);
               }
               //add message code to be sent back as confirmation
               enqueueMessageCode(messageCodesToBeSentBackAsConfirmationQueue, messageCodeInNetworkByteOrder);
-              renderStatus(MESSAGE_RECEIVED, &allMessages->winSize);
+              renderStatus(MESSAGE_RECEIVED, &programData->winSize);
 
               //if it arrived here, all messages confirmation codes were received
               //being the case, let's reset values
@@ -206,9 +206,9 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
                 memcpy(&messageConfirmationCode, messageConfirmationBuffer, sizeof(uint32_t));
                 messageConfirmationCode = ntohl(messageConfirmationCode);
 
-                if(messageConfirmationCode < 0 || messageConfirmationCode > allMessages->messagesByCode.length) errExit(25);
-                updateSentMessageStatusAsReceivedReadByMessageCode(allMessages, messageConfirmationCode);
-                if(isMessageOnScreen(allMessages, messageConfirmationCode)) {
+                if(messageConfirmationCode < 0 || messageConfirmationCode > programData->messagesByCode.length) errExit(25);
+                updateSentMessageStatusAsReceivedReadByMessageCode(programData, messageConfirmationCode);
+                if(isMessageOnScreen(programData, messageConfirmationCode)) {
                   isAnyOfTheMessagesFromCodesOnScreen = true;
                 }
 
@@ -216,7 +216,7 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
                   doingNow = FINALIZING_READING_MESSAGE_CONFIRMATIONS;
                 }
                 gotSize = 0;
-                renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &allMessages->winSize);
+                renderStatus(MESSAGE_CONFIRMATION_RECEIVED, &programData->winSize);
                 break;
               }
             }
@@ -246,5 +246,5 @@ void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messa
     }
 
   }
-  allMessages->socketInputStatus.isInputAvailable = false;
+  programData->socketInputStatus.isInputAvailable = false;
 }

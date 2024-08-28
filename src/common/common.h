@@ -117,6 +117,7 @@ typedef struct {
 } MessagesByCodeArray;
 
 typedef struct {
+  //size of all messages add up toghether
   unsigned int sizeInChars;
   Message *currentStartingMessage;
   unsigned int currentStartingMessageCharPosition;
@@ -141,16 +142,16 @@ typedef struct {
 
   EVP_PKEY *pKey;
   EVP_PKEY *pubKey;
-} AllMessages;
+} ProgramData;
 
-void addNewMessage(AllMessages *allMessages, char *message, uint16_t size, uint8_t owner);
+void addNewMessage(ProgramData *programData, char *message, uint16_t size, uint8_t owner);
 void renderCurrentlyBeingWrittenMessage(char *inputBufer, uint16_t inputBufferSize, struct winsize *winSize);
 
-int8_t renderMessages(AllMessages *allMessages);
-int8_t updatePostion(AllMessages *allMessages, char jOrK);
+int8_t renderMessages(ProgramData *programData);
+int8_t updatePostion(ProgramData *programData, char jOrK);
 u_int16_t getWordSize(char *from, u_int16_t stopAfterNBytes);
 
-void updateSentMessageStatusAsReceivedReadByMessageCode(AllMessages *allMessages, uint32_t messageCode);
+void updateSentMessageStatusAsReceivedReadByMessageCode(ProgramData *programData, uint32_t messageCode);
 
 struct MessageCode {
   uint32_t codeInNetworkByteOrder;
@@ -168,12 +169,12 @@ typedef struct {
 
 void enqueueMessageCode(MessageCodesToBeSentBackQueue *queue, uint32_t code);
 uint32_t dequeueMessageCode(MessageCodesToBeSentBackQueue *queue);
-bool isMessageOnScreen(AllMessages *allMessages, uint32_t messageCode);
+bool isMessageOnScreen(ProgramData *programData, uint32_t messageCode);
 
-void processInput(AllMessages *allMessages);
-void writeToPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey);
+void processInput(ProgramData *programData);
+void writeToPeer(ProgramData *programData, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pubKey);
 #include "init.h"
-void readFromPeer(AllMessages *allMessages, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey);
+void readFromPeer(ProgramData *programData, MessageCodesToBeSentBackQueue *messageCodesToBeSentBackAsConfirmationQueue, int8_t *fd, EVP_PKEY *pKey);
 
 void renderStatus(uint8_t type, struct winsize *winSize);
 

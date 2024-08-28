@@ -18,8 +18,8 @@
 
 #include "common.h"
 
-void updateSentMessageStatusAsReceivedReadByMessageCode(AllMessages *allMessages, uint32_t messageCode) {
-  if(messageCode <= allMessages->messagesByCode.currentSize) {
-    allMessages->messagesByCode.array[messageCode]->status = PEER_RECEIVED;
+void updateSentMessageStatusAsReceivedReadByMessageCode(ProgramData *programData, uint32_t messageCode) {
+  if(messageCode <= programData->messagesByCode.currentSize) {
+    programData->messagesByCode.array[messageCode]->status = PEER_RECEIVED;
   }
 }

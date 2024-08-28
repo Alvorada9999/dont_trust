@@ -110,12 +110,12 @@ void addBackgroundColorEscapeSequence(char *textToOutput, uint32_t *textToOutput
  * - At least 3 rows are available on terminal
  * - As long the height*(lenght-2) of the terminal dont suprass DEFAULT_MESSAGE_OUTPUT_SIZE
 */
-int8_t renderMessages(AllMessages *allMessages) {
-  allMessages->numberOfMessagesBeingShow = 0;
+int8_t renderMessages(ProgramData *programData) {
+  programData->numberOfMessagesBeingShow = 0;
 
   //stop if there are no messages
-  if(allMessages->currentStartingMessage == NULL) return 0;
-  struct winsize winSize = allMessages->winSize;
+  if(programData->currentStartingMessage == NULL) return 0;
+  struct winsize winSize = programData->winSize;
   // the last two rows are used to show some info and the text that is currently being typed
   u_int32_t amountOfCharsThatCanBeShow = ((uint32_t)winSize.ws_row - 2) * (uint32_t)winSize.ws_col;
   if(winSize.ws_row < 3) return 0;
@@ -125,9 +125,9 @@ int8_t renderMessages(AllMessages *allMessages) {
   u_int32_t textToOutputWrittenSize = 0;
   u_int32_t maxWritingSize = amountOfCharsThatCanBeShow;
 
-  u_int16_t remainingRowSpace = winSize.ws_col, currentMessageReadSizeInBytes = allMessages->currentStartingMessageCharPosition;
+  u_int16_t remainingRowSpace = winSize.ws_col, currentMessageReadSizeInBytes = programData->currentStartingMessageCharPosition;
   u_int16_t wordSize = 0;
-  Message *currentMessage = allMessages->currentStartingMessage;
+  Message *currentMessage = programData->currentStartingMessage;
   updateBackgroundColor(currentMessage->status, textToOutput, &textToOutputWrittenSize, &maxWritingSize);
   do {
     while(currentMessageReadSizeInBytes < currentMessage->size && textToOutputWrittenSize < maxWritingSize) {
@@ -187,8 +187,8 @@ int8_t renderMessages(AllMessages *allMessages) {
     }
     remainingRowSpace = winSize.ws_col;
 
-    allMessages->numberOfMessagesBeingShow += 1;
-    allMessages->messagesBeingShowCode[allMessages->numberOfMessagesBeingShow] = currentMessage->code;
+    programData->numberOfMessagesBeingShow += 1;
+    programData->messagesBeingShowCode[programData->numberOfMessagesBeingShow] = currentMessage->code;
 
     currentMessage = currentMessage->nextMessage;
     currentMessageReadSizeInBytes = 0;
@@ -199,13 +199,13 @@ int8_t renderMessages(AllMessages *allMessages) {
       updateBackgroundColor(currentMessage->status, textToOutput, &textToOutputWrittenSize, &maxWritingSize);
     }
 
-  } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize && allMessages->numberOfMessagesBeingShow < DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW);
+  } while(currentMessage != NULL && textToOutputWrittenSize < maxWritingSize && programData->numberOfMessagesBeingShow < DEFAULT_MAX_NUMBER_OF_MESSAGES_ON_SHOW);
   addBackgroundColorEscapeSequence(textToOutput, &textToOutputWrittenSize, &maxWritingSize);
 
   if(maxWritingSize >= winSize.ws_col) {
-    allMessages->isThereSpaceLeftOnScreenForMoreMessages = true;
+    programData->isThereSpaceLeftOnScreenForMoreMessages = true;
   } else {
-    allMessages->isThereSpaceLeftOnScreenForMoreMessages = false;
+    programData->isThereSpaceLeftOnScreenForMoreMessages = false;
   }
 
   static ssize_t writtenSize = 0;
