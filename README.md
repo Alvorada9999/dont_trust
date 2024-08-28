@@ -121,7 +121,7 @@ Runs on top of tcp, there are 2 commands available:
 ### 0x01 = Starts a message
 After which should be on the following order:<br>
 
-- An unsigned 32 bit number in network byte order, that's the message code
+- An unsigned 32 bit number in network byte order, that's the message code (Both peers must start as 0, incrementing it's value by 1 for each new message)
 - An unsigned 32 bit number in network byte order containing the cipher text size in bytes
 - The initialization vector used to decrypt the cipher text, a sequence of 16 bytes
 - The private key encrypted session key (AES in this case) used to decrypt the ciphertext, a sequence of 256 bytes
@@ -131,7 +131,7 @@ After which should be on the following order:<br>
 After which should be on the following order:<br>
 
 - An unsigned 32 bit number in network byte order, that's the number of confirmations codes
-- n unsigned 32 bit numbers in network byte order, each being a message code from a particular message (Only your own messages have their code saved in the application, that's implementation dependent)
+- n unsigned 32 bit numbers in network byte order, each being a message code from a particular message received from the peer
 
 ## Customization
 
