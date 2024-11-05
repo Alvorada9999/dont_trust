@@ -1,22 +1,22 @@
 # donttrust
 
 ```bash
-  ;                    
-  ED.                  
-  E#Wi                 
-  E###G.               
+  ;
+  ED.
+  E#Wi
+  E###G.
   E#fD#W;     GEEEEEEEL
   E#t t##L    ,;;L#K;;.
-  E#t  .E#K,     t#E   
-  E#t    j##f    t#E   
-  E#t    :E#K:   t#E   
-  E#t   t##L     t#E   
-  E#t .D#W;      t#E   
-  E#tiW#G.       t#E   
-  E#K##i         t#E   
-  E##D.           fE   
-  E#t              :   
-  L:                   
+  E#t  .E#K,     t#E
+  E#t    j##f    t#E
+  E#t    :E#K:   t#E
+  E#t   t##L     t#E
+  E#t .D#W;      t#E
+  E#tiW#G.       t#E
+  E#K##i         t#E
+  E##D.           fE
+  E#t              :
+  L:
 ```
 <img src='./preview.gif'>
 
