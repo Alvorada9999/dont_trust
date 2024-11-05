@@ -36,7 +36,13 @@ bool isValidOnionAddress(char *addr) {
 }
 
 void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
-  const char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n\n  -t            Connects to an IPv4\n  -o            Connects to a hidden service\n  --pKey        Your PEM encoded private key file path\n  --pubKey      The peer PEM encoded public key file path\n  -h            This help message\n";
+  const char *helpMessage = "This application, if not given an address, will start as a server waiting for connections\n\n"
+                            "-t                     Connects to an IPv4\n"
+                            "-h                     This help message\n"
+                            "-o                     Connects to a hidden service\n"
+                            "--pKey                 Your PEM encoded private key file path\n"
+                            "--pubKey               The peer PEM encoded public key file path\n"
+                            "--torControlPassword   Initialize the server as a onion service (requires tor installed)\n";
   commandLineOptions -> ipV4 = NULL;
   commandLineOptions -> onionAddress = NULL;
   commandLineOptions -> chosenOption = -1;
@@ -121,4 +127,3 @@ void getConfigs(int argc, char *argv[], Configs *commandLineOptions){
     exit(EXIT_SUCCESS);
   }
 }
-
